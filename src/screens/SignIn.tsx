@@ -1,6 +1,6 @@
 import { Text } from "react-native";
 import { VStack } from "@/components/ui/vstack";
-import { Input } from "@/components/Input";
+import { Input } from "@components/Input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
 import { useState } from "react";

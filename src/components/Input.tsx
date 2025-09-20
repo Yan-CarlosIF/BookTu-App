@@ -5,7 +5,7 @@ import {
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
-} from "./ui/form-control";
+} from "@/components/ui/form-control";
 import {
   InputField,
   Input as InputBase,
@@ -13,7 +13,7 @@ import {
   IInputFieldProps,
   InputIcon,
   InputSlot,
-} from "./ui/input";
+} from "@/components/ui/input";
 
 import { LucideIcon } from "lucide-react-native";
 

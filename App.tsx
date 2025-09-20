@@ -16,6 +16,7 @@ import { StatusBar } from "expo-status-bar";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
 import { SingIn } from "./src/screens/SignIn";
+import { Loading } from "./src/components/Loading";
 
 export default function App() {
   const [loaded] = useFonts({
@@ -29,14 +30,10 @@ export default function App() {
     Poppins_700Bold,
   });
 
-  if (!loaded) {
-    return null;
-  }
-
   return (
     <GluestackUIProvider mode="light">
       <StatusBar style="auto" translucent backgroundColor="transparent" />
-      <SingIn />
+      {loaded ? <SingIn /> : <Loading />}
     </GluestackUIProvider>
   );
 }
