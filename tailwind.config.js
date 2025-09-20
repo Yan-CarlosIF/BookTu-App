@@ -171,8 +171,8 @@ module.exports = {
           muted: "rgb(var(--color-background-muted)/<alpha-value>)",
           success: "rgb(var(--color-background-success)/<alpha-value>)",
           info: "rgb(var(--color-background-info)/<alpha-value>)",
-          // light: '#FBFBFB',
-          // dark: '#181719',
+          light: '#FBFBFB',
+          dark: '#181719',
         },
         indicator: {
           primary: "rgb(var(--color-indicator-primary)/<alpha-value>)",
@@ -191,6 +191,8 @@ module.exports = {
         "space-mono": ["var(--font-space-mono)"],
         poppins: ["Poppins_400Regular"],
         "poppins-bold": ["Poppins_700Bold"],
+        "poppins-semibold": ["Poppins_600SemiBold"],
+        "poppins-medium": ["Poppins_500Medium"],
       },
       fontWeight: {
         extrablack: "950",

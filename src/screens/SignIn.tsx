@@ -3,11 +3,17 @@ import { VStack } from "@/components/ui/vstack";
 import { Input } from "@components/Input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { InputIcon, InputSlot } from "@/components/ui/input";
+import { AuthContext } from "../contexts/AuthContext";
 
 export function SingIn() {
+  const { login } = useContext(AuthContext);
   const [hidePassword, setHidePassword] = useState(true);
+
+  async function handleSignIn() {
+    await login("token");
+  }
 
   return (
     <VStack className="flex-1 w-full items-center justify-center px-[45px] bg-white">
@@ -36,7 +42,10 @@ export function SingIn() {
           placeholder="******"
           secureTextEntry={hidePassword}
         />
-        <Button className="bg-teal-700 h-14 mt-16 data-[active=true]:bg-teal-600">
+        <Button
+          onPress={handleSignIn}
+          className="bg-teal-700 h-14 mt-16 data-[active=true]:bg-teal-600"
+        >
           <Text className="font-inter font-bold text-xl text-white">
             Iniciar sessão
           </Text>

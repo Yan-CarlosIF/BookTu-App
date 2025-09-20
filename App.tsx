@@ -1,3 +1,5 @@
+import "@/global.css";
+
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -12,14 +14,14 @@ import {
 } from "@expo-google-fonts/poppins";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
-
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import "@/global.css";
-import { SingIn } from "./src/screens/SignIn";
 import { Loading } from "./src/components/Loading";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthProvider } from "./src/contexts/AuthContext";
+import { Routes } from "./src/routes";
 
 export default function App() {
-  const [loaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -31,9 +33,13 @@ export default function App() {
   });
 
   return (
-    <GluestackUIProvider mode="light">
-      <StatusBar style="auto" translucent backgroundColor="transparent" />
-      {loaded ? <SingIn /> : <Loading />}
-    </GluestackUIProvider>
+    <SafeAreaView className="flex-1">
+      <AuthProvider>
+        <GluestackUIProvider mode="light">
+          <StatusBar style="auto" translucent backgroundColor="transparent" />
+          {fontsLoaded ? <Routes /> : <Loading />}
+        </GluestackUIProvider>
+      </AuthProvider>
+    </SafeAreaView>
   );
 }
