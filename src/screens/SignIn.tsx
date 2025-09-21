@@ -1,18 +1,30 @@
-import { Text } from "react-native";
+import { Alert, Text } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Input } from "@components/Input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@components/Button";
 import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { InputIcon, InputSlot } from "@/components/ui/input";
-import { AuthContext } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 export function SingIn() {
-  const { login } = useContext(AuthContext);
+  const { signIn } = useAuth();
+
   const [hidePassword, setHidePassword] = useState(true);
+  const [password, setPassword] = useState("");
+  const [login, setLogin] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSignIn() {
-    await login("token");
+    try {
+      setIsLoading(true);
+
+      await signIn(login.trim(), password.trim());
+    } catch (error) {
+      Alert.alert("Erro", "Login ou senha inválidos");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -23,6 +35,8 @@ export function SingIn() {
       </Text>
       <VStack className="mt-14 gap-7 w-full">
         <Input
+          value={login}
+          onChangeText={setLogin}
           leftIcon={UserRound}
           className="h-[50px] px-4 bg-gray-300 border-gray-500 group-data data-[focus=true]:border-teal-700"
           label="Login"
@@ -37,12 +51,15 @@ export function SingIn() {
               <InputIcon as={hidePassword ? Eye : EyeOff} size={20} />
             </InputSlot>
           }
+          value={password}
+          onChangeText={setPassword}
           className="h-[50px] px-4 bg-gray-300 border-gray-500 data-[focus=true]:border-teal-700"
           label="Senha"
           placeholder="******"
           secureTextEntry={hidePassword}
         />
         <Button
+          isLoading={isLoading}
           onPress={handleSignIn}
           className="bg-teal-700 h-14 mt-16 data-[active=true]:bg-teal-600"
         >

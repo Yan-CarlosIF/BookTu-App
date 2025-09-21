@@ -278,7 +278,7 @@ const buttonGroupStyle = tva({
   },
 });
 
-type IButtonProps = Omit<
+export type IButtonProps = Omit<
   React.ComponentPropsWithoutRef<typeof UIButton>,
   'context'
 > &

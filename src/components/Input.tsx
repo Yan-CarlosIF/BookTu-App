@@ -26,6 +26,8 @@ type InputProps = {
   IInputFieldProps;
 
 export function Input({
+  value,
+  onChangeText,
   secureTextEntry,
   helper,
   label,
@@ -46,6 +48,8 @@ export function Input({
           </InputSlot>
         )}
         <InputField
+          value={value}
+          onChangeText={onChangeText}
           autoCapitalize="none"
           secureTextEntry={secureTextEntry}
           className={`font-inter font-semibold text-gray-600 text-base `}

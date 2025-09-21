@@ -10,25 +10,22 @@ import {
   Zap,
 } from "lucide-react-native";
 import { Button } from "@/components/ui/button";
-import { useContext } from "react";
-import { AuthContext } from "../contexts/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { useAuth } from "../hooks/useAuth";
 
 export function Home() {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
-  const { logout } = useContext(AuthContext);
+  const { signOut } = useAuth();
 
-  async function handleLogout() {
-    await logout();
-  }
+  const handleSignOut = async () => await signOut();
 
   return (
     <VStack className="flex-1">
       <HStack className="items-center justify-between px-8 bg-teal-700 h-[68px] w-full">
         <Text className="text-white text-2xl font-poppins-bold">BookTu</Text>
-        <TouchableOpacity onPress={handleLogout} activeOpacity={0.7}>
+        <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
           <LogOut color="red" size={28} />
         </TouchableOpacity>
       </HStack>
