@@ -6,22 +6,42 @@ import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
 import { useState } from "react";
 import { InputIcon, InputSlot } from "@/components/ui/input";
 import { useAuth } from "../hooks/useAuth";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const signInFormSchema = z.object({
+  login: z.string().min(1, "Login obrigatório"),
+  password: z.string().min(1, "Senha obrigatória"),
+});
+
+type SignInFormData = z.infer<typeof signInFormSchema>;
 
 export function SingIn() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInFormSchema),
+    defaultValues: {
+      login: "",
+      password: "",
+    },
+  });
+
   const { signIn } = useAuth();
 
   const [hidePassword, setHidePassword] = useState(true);
-  const [password, setPassword] = useState("");
-  const [login, setLogin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSignIn() {
+  async function handleSignIn({ login, password }: SignInFormData) {
     try {
       setIsLoading(true);
 
       await signIn(login.trim(), password.trim());
     } catch (error) {
-      Alert.alert("Erro", "Login ou senha inválidos");
+      Alert.alert("Opa!", "Login ou senha inválidos.");
     } finally {
       setIsLoading(false);
     }
@@ -34,33 +54,48 @@ export function SingIn() {
         Iniciar sessão
       </Text>
       <VStack className="mt-14 gap-7 w-full">
-        <Input
-          value={login}
-          onChangeText={setLogin}
-          leftIcon={UserRound}
-          className="h-[50px] px-4 bg-gray-300 border-gray-500 group-data data-[focus=true]:border-teal-700"
-          label="Login"
-          placeholder="Login"
+        <Controller
+          name="login"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <Input
+              leftIcon={UserRound}
+              value={value}
+              onChangeText={onChange}
+              error={errors.login?.message}
+              className="h-[50px] px-4 bg-gray-300 border-gray-500 group-data data-[focus=true]:border-teal-700"
+              label="Login"
+              placeholder="Login"
+            />
+          )}
         />
-        <Input
-          leftIcon={Lock}
-          rightIcon={
-            <InputSlot
-              onPress={() => setHidePassword((prevState) => !prevState)}
-            >
-              <InputIcon as={hidePassword ? Eye : EyeOff} size={20} />
-            </InputSlot>
-          }
-          value={password}
-          onChangeText={setPassword}
-          className="h-[50px] px-4 bg-gray-300 border-gray-500 data-[focus=true]:border-teal-700"
-          label="Senha"
-          placeholder="******"
-          secureTextEntry={hidePassword}
+
+        <Controller
+          name="password"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <Input
+              leftIcon={Lock}
+              value={value}
+              onChangeText={onChange}
+              error={errors.password?.message}
+              rightIcon={
+                <InputSlot
+                  onPress={() => setHidePassword((prevState) => !prevState)}
+                >
+                  <InputIcon as={hidePassword ? Eye : EyeOff} size={20} />
+                </InputSlot>
+              }
+              className="h-[50px] px-4 bg-gray-300 border-gray-500 data-[focus=true]:border-teal-700"
+              label="Senha"
+              placeholder="******"
+              secureTextEntry={hidePassword}
+            />
+          )}
         />
         <Button
           isLoading={isLoading}
-          onPress={handleSignIn}
+          onPress={handleSubmit(handleSignIn)}
           className="bg-teal-700 h-14 mt-16 data-[active=true]:bg-teal-600"
         >
           <Text className="font-inter font-bold text-xl text-white">

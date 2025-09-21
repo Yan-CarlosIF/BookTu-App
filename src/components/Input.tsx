@@ -15,17 +15,19 @@ import {
   InputSlot,
 } from "@/components/ui/input";
 
-import { LucideIcon } from "lucide-react-native";
+import { CircleAlert, LucideIcon } from "lucide-react-native";
 
 type InputProps = {
   rightIcon?: React.ReactNode;
   leftIcon?: LucideIcon;
   helper?: string;
   label?: string;
+  error?: string;
 } & IInputProps &
   IInputFieldProps;
 
 export function Input({
+  error,
   value,
   onChangeText,
   secureTextEntry,
@@ -37,7 +39,7 @@ export function Input({
   ...props
 }: InputProps) {
   return (
-    <FormControl>
+    <FormControl isInvalid={!!error}>
       <FormControlLabel>
         <FormControlLabelText>{label}</FormControlLabelText>
       </FormControlLabel>
@@ -58,8 +60,8 @@ export function Input({
         {rightIcon && rightIcon}
       </InputBase>
       <FormControlError>
-        <FormControlErrorIcon />
-        <FormControlErrorText />
+        <FormControlErrorIcon as={CircleAlert} size={16} />
+        <FormControlErrorText>{error}</FormControlErrorText>
       </FormControlError>
     </FormControl>
   );
