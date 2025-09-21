@@ -9,6 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "../hooks/useToast";
 
 const signInFormSchema = z.object({
   login: z.string().min(1, "Login obrigatório"),
@@ -30,6 +31,7 @@ export function SingIn() {
     },
   });
 
+  const toast = useToast();
   const { signIn } = useAuth();
 
   const [hidePassword, setHidePassword] = useState(true);
@@ -40,8 +42,18 @@ export function SingIn() {
       setIsLoading(true);
 
       await signIn(login.trim(), password.trim());
-    } catch (error) {
-      Alert.alert("Opa!", "Login ou senha inválidos.");
+
+      toast.show({
+        message: "Login realizado com sucesso!",
+        variant: "success",
+      });
+    } catch {
+      toast.show({
+        message: "Login ou senha inválidos.",
+        variant: "error",
+        closeButton: true,
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }

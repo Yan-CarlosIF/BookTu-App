@@ -19,6 +19,7 @@ import { Loading } from "./src/components/Loading";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { Routes } from "./src/routes";
+import { ToastProvider } from "./src/contexts/ToastContext";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -36,8 +37,10 @@ export default function App() {
     <SafeAreaView className="flex-1">
       <AuthProvider>
         <GluestackUIProvider mode="light">
-          <StatusBar style="auto" translucent backgroundColor="transparent" />
-          {fontsLoaded ? <Routes /> : <Loading />}
+          <ToastProvider>
+            <StatusBar style="auto" translucent backgroundColor="transparent" />
+            {fontsLoaded ? <Routes /> : <Loading />}
+          </ToastProvider>
         </GluestackUIProvider>
       </AuthProvider>
     </SafeAreaView>
