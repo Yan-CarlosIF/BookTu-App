@@ -12,8 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 export function Home() {
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+
   const { logout } = useContext(AuthContext);
 
   async function handleLogout() {
@@ -30,7 +34,10 @@ export function Home() {
       </HStack>
       <VStack className="px-6">
         <HStack className="mt-16 gap-4">
-          <Button className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600">
+          <Button
+            onPress={() => navigate("books")}
+            className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600"
+          >
             <Book color="white" size={24} />
             <Text className="text-sm font-poppins mt-3 text-white">Livros</Text>
           </Button>
