@@ -1,23 +1,29 @@
 import { VStack } from "@/components/ui/vstack";
 import { Header } from "../components/Header";
 import { Input } from "../components/Input";
-import { Funnel, Info, Search } from "lucide-react-native";
-import { InputIcon } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectPortal,
-  SelectBackdrop,
-  SelectContent,
-  SelectDragIndicatorWrapper,
-  SelectDragIndicator,
-  SelectItem,
-} from "@/components/ui/select";
+import { Info, Search } from "lucide-react-native";
 import { FlatList, Text, TouchableOpacity } from "react-native";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Select } from "@components/Select";
+
+const BOOK_FILTERS = [
+  { label: "A-Z", value: "asc" },
+  { label: "Z-A", value: "desc" },
+  { label: "Menor preço", value: "price-asc" },
+  { label: "Maior preço", value: "price-desc" },
+  { label: "Mais recentes", value: "latest" },
+  { label: "Mais antigos", value: "oldest" },
+] as const;
+
+type Filters = (typeof BOOK_FILTERS)[number]["value"];
 
 export function Books() {
+  const [selectedFilter, setSelectedFilter] = useState<Filters | undefined>(
+    undefined
+  );
+
   return (
     <VStack className="flex-1">
       <Header title="Livros" />
@@ -27,31 +33,11 @@ export function Books() {
           className="h-12 px-3 data-[focus=true]:border-teal-700"
           placeholder="Buscar pelo título, autor ou identificador"
           rightIcon={
-            <Select>
-              <SelectTrigger className="border-0" size="md">
-                <InputIcon as={Funnel} />
-              </SelectTrigger>
-              <SelectPortal>
-                <SelectBackdrop />
-                <SelectContent>
-                  <SelectDragIndicatorWrapper>
-                    <SelectDragIndicator />
-                  </SelectDragIndicatorWrapper>
-                  <SelectItem label="UX Research" value="ux" />
-                  <SelectItem label="Web Development" value="web" />
-                  <SelectItem
-                    label="Cross Platform Development Process"
-                    value="Cross Platform Development Process"
-                  />
-                  <SelectItem
-                    label="UI Designing"
-                    value="ui"
-                    isDisabled={true}
-                  />
-                  <SelectItem label="Backend Development" value="backend" />
-                </SelectContent>
-              </SelectPortal>
-            </Select>
+            <Select
+              options={BOOK_FILTERS}
+              selectedFilter={selectedFilter}
+              setSelectedFilter={setSelectedFilter}
+            />
           }
         />
 
