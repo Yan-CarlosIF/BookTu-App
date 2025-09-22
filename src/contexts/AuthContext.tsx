@@ -5,11 +5,13 @@ import {
   storageSetAuthToken,
 } from "../storage/StorageAuthToken";
 import { api } from "../lib/api";
+import { useSignIn } from "../useCases/Login";
 
 type AuthContextType = {
   token: string | null;
   signIn: (login: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  isLoading: boolean;
 };
 
 export const AuthContext = createContext<AuthContextType>(
@@ -18,17 +20,15 @@ export const AuthContext = createContext<AuthContextType>(
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
+  const { mutateAsync: SignIn, isPending } = useSignIn();
 
   async function signIn(login: string, password: string) {
-    const { data } = await api.post<{ token: string }>("/auth/session", {
-      login,
-      password,
-    });
+    const token = await SignIn({ login, password });
 
-    api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-    await storageSetAuthToken(data.token);
-    setToken(data.token);
+    await storageSetAuthToken(token);
+    setToken(token);
   }
 
   async function signOut() {
@@ -54,7 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [signOut]);
 
   return (
-    <AuthContext.Provider value={{ token, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ token, signIn, signOut, isLoading: isPending }}
+    >
       {children}
     </AuthContext.Provider>
   );

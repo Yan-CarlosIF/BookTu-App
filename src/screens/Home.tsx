@@ -2,7 +2,7 @@ import { VStack } from "@/components/ui/vstack";
 import { TouchableOpacity, Text, FlatList } from "react-native";
 import { HStack } from "@/components/ui/hstack";
 import { Book, Box, ClipboardList, LogOut } from "lucide-react-native";
-import { Button } from "@/components/ui/button";
+import { Button } from "@components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useAuth } from "../hooks/useAuth";
@@ -32,13 +32,19 @@ export function Home() {
             <Book color="white" size={24} />
             <Text className="text-sm font-poppins mt-3 text-white">Livros</Text>
           </Button>
-          <Button className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600">
+          <Button
+            isDisabled
+            className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600"
+          >
             <ClipboardList color="white" size={24} />
             <Text className="text-sm font-poppins mt-3 text-white">
               Inventários
             </Text>
           </Button>
-          <Button className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600">
+          <Button
+            isDisabled
+            className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600"
+          >
             <Box color="white" size={24} />
             <Text className="text-sm font-poppins mt-3 text-white">
               Estoque

@@ -1,4 +1,4 @@
-import { Alert, Text } from "react-native";
+import { Text } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -32,15 +32,12 @@ export function SingIn() {
   });
 
   const toast = useToast();
-  const { signIn } = useAuth();
+  const { signIn, isLoading } = useAuth();
 
   const [hidePassword, setHidePassword] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSignIn({ login, password }: SignInFormData) {
     try {
-      setIsLoading(true);
-
       await signIn(login.trim(), password.trim());
 
       toast.show({
@@ -54,8 +51,6 @@ export function SingIn() {
         closeButton: true,
         duration: 5000,
       });
-    } finally {
-      setIsLoading(false);
     }
   }
 
