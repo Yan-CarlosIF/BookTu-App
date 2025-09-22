@@ -5,14 +5,14 @@ import { TouchableOpacity, Text, TouchableOpacityProps } from "react-native";
 import { Book } from "../shared/types/book";
 import { formatPrice } from "../utils/formatPrice";
 
+type BookCardProps = TouchableOpacityProps & {
+  book: Book;
+};
+
 export function BookCard({
-  title,
-  release_year,
-  price,
-  identifier,
-  categories,
+  book: { title, release_year, price, identifier, categories },
   onPress,
-}: Partial<Book> & TouchableOpacityProps) {
+}: BookCardProps) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
       <Card className="bg-teal-700 flex-col py-2 px-4 rounded-xl justify-start max-h-[130px] mb-12">

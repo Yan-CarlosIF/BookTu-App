@@ -5,7 +5,7 @@ import {
   storageSetAuthToken,
 } from "../storage/StorageAuthToken";
 import { api } from "../lib/api";
-import { useSignIn } from "../useCases/Login";
+import { useSignIn } from "../useCases/useSignIn";
 
 type AuthContextType = {
   token: string | null;

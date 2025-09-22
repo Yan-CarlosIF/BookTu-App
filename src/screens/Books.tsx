@@ -8,6 +8,8 @@ import { Select } from "@components/Select";
 import { BookCard } from "../components/BookCard";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { useListBooks } from "../useCases/useListBooks";
+import { Spinner } from "@/components/ui/spinner";
 
 const BOOK_FILTERS = [
   { label: "A-Z", value: "asc" },
@@ -23,15 +25,29 @@ type Filters = (typeof BOOK_FILTERS)[number]["value"];
 export function Books() {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
+  const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<Filters | undefined>(
     undefined
   );
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isRefetching,
+    refetch,
+    isFetchingNextPage,
+  } = useListBooks(selectedFilter, search);
+
+  const books = data?.pages.flatMap((page) => page.books) ?? [];
 
   return (
     <VStack className="flex-1">
       <Header title="Livros" />
       <VStack className="px-7 flex-1">
         <Input
+          value={search}
+          onChangeText={setSearch}
           leftIcon={Search}
           className="h-12 px-3 data-[focus=true]:border-teal-700"
           placeholder="Buscar pelo título, autor ou identificador"
@@ -47,30 +63,26 @@ export function Books() {
         <FlatList
           showsVerticalScrollIndicator={false}
           className="mt-16 flex-1"
-          data={[1, 2, 3, 4, 5]}
-          keyExtractor={(item) => String(item)}
-          renderItem={({ index }) => (
+          data={books}
+          keyExtractor={({ id }) => id}
+          renderItem={({ item: book }) => (
             <BookCard
-              onPress={() => {
-                navigate("bookDetails", { bookId: index.toString() });
-              }}
-              key={index}
-              categories={[
-                { id: "1", name: "categoria 1" },
-                { id: "2", name: "categoria 2" },
-                { id: "3", name: "categoria 3" },
-              ]}
-              identifier="1234"
-              price={39.9}
-              title="Diário de Anne Frank"
-              release_year={1992}
+              onPress={() => navigate("bookDetails", { bookId: book.id })}
+              book={book}
             />
           )}
+          onEndReached={() => hasNextPage && fetchNextPage()}
+          onEndReachedThreshold={0.5}
+          refreshing={isRefetching}
+          onRefresh={refetch}
           ListEmptyComponent={() => (
             <Text className="text-gray-600 text-2xl font-poppins text-center">
               Nenhum livro encontrado...
             </Text>
           )}
+          ListFooterComponent={
+            isFetchingNextPage ? <Spinner size="large" /> : null
+          }
         />
       </VStack>
     </VStack>
