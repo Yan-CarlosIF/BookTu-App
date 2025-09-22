@@ -12,16 +12,25 @@ import {
   UserPen,
 } from "lucide-react-native";
 import { formatPrice } from "../utils/formatPrice";
+import { useRoute } from "@react-navigation/native";
+import { useGetBook } from "../useCases/useGetBook";
+import { Loading } from "../components/Loading";
 
 export function BookDetails() {
+  const { params } = useRoute();
+
+  const { bookId } = params as { bookId: string };
+
+  const { data: book, isFetching } = useGetBook(bookId);
+
+  if (isFetching) return <Loading />;
+
   return (
     <ScrollView>
       <VStack>
         <Header title="Detalhes do Livro" />
         <VStack className="px-6 mt-7">
-          <Text className="text-2xl font-bold font-inter">
-            Diário de Anne Frank
-          </Text>
+          <Text className="text-2xl font-bold font-inter">{book?.title}</Text>
           <Grid className="gap-6 mt-9" _extra={{ className: "grid-cols-2" }}>
             <GridItem
               className="w-[170px] items-center justify-between h-full max-h-[110px] p-6 bg-teal-300/25 rounded-xl"
@@ -33,7 +42,7 @@ export function BookDetails() {
                   Identificador
                 </Text>
               </HStack>
-              <Text className="text-2xl font-bold ">1234</Text>
+              <Text className="text-2xl font-bold ">{book?.identifier}</Text>
             </GridItem>
             <GridItem
               className="w-[170px] items-center justify-between h-full max-h-[110px] p-6 bg-teal-300/25 rounded-xl"
@@ -45,7 +54,7 @@ export function BookDetails() {
                   Ano de lançamento
                 </Text>
               </HStack>
-              <Text className="text-2xl font-bold ">1992</Text>
+              <Text className="text-2xl font-bold ">{book?.release_year}</Text>
             </GridItem>
             <GridItem
               className="w-[170px] items-center justify-between h-full max-h-[110px] p-6 bg-teal-300/25 rounded-xl"
@@ -55,7 +64,7 @@ export function BookDetails() {
                 <UserPen color="#0f766e" />
                 <Text className="text-sm text-gray-800 font-medium">Autor</Text>
               </HStack>
-              <Text className="text-2xl font-bold ">Anne Frank</Text>
+              <Text className="text-2xl font-bold ">{book?.author}</Text>
             </GridItem>
             <GridItem
               className="w-[170px] items-center justify-between h-full max-h-[110px] p-6 bg-teal-300/25 rounded-xl"
@@ -65,7 +74,9 @@ export function BookDetails() {
                 <DollarSign color="#0f766e" />
                 <Text className="text-sm text-gray-800 font-medium">Preço</Text>
               </HStack>
-              <Text className="text-2xl font-bold ">{formatPrice(39.9)}</Text>
+              <Text className="text-2xl font-bold ">
+                {formatPrice(book?.price!)}
+              </Text>
             </GridItem>
           </Grid>
           <HStack className="mt-20 gap-[10px] items-center">
@@ -73,7 +84,7 @@ export function BookDetails() {
             <Text className="text-xl font-bold text-gray-800">Categorias</Text>
           </HStack>
           <FlatList
-            data={["Suspense", "Mistério", "Ficção", "Terror", "Aventura"]}
+            data={book?.categories.map((category) => category.name)}
             horizontal
             keyExtractor={(item) => item}
             className="mt-3"
@@ -86,8 +97,12 @@ export function BookDetails() {
           />
           <Text className="mt-10 text-xl font-bold">Descrição</Text>
 
-          <Text className="font-sm mt-3 text-gray-600 mb-7 text-justify">
-            Uma história envolvente que mistura suspense e mistério...
+          <Text
+            className={`font-sm mt-3 ${
+              book?.description ? "text-gray-800" : "text-gray-600"
+            } mb-7 text-justify`}
+          >
+            {book?.description ?? "Livro não possui descrição..."}
           </Text>
         </VStack>
       </VStack>
