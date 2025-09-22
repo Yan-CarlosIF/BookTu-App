@@ -39,12 +39,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       const token = await storageGetAuthToken();
+
       if (token) {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         setToken(token);
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = api.registerInterceptTokenManager(signOut);
+
+    return () => unsubscribe();
+  }, [signOut]);
 
   return (
     <AuthContext.Provider value={{ token, signIn, signOut }}>
