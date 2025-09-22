@@ -4,10 +4,14 @@ import {
 } from "@react-navigation/native-stack";
 import { Home } from "../screens/Home";
 import { Books } from "../screens/Books";
+import { BookDetails } from "../screens/BookDetails";
 
 type AppRoutes = {
   home: undefined;
   books: undefined;
+  bookDetails: {
+    bookId: string;
+  };
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
@@ -19,6 +23,7 @@ export function AppRoutes() {
     <Navigator screenOptions={{ headerShown: false }}>
       <Screen name="home" component={Home} />
       <Screen name="books" component={Books} />
+      <Screen name="bookDetails" component={BookDetails} />
     </Navigator>
   );
 }

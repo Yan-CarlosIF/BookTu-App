@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { HStack } from "@/components/ui/hstack";
 import { Info } from "lucide-react-native";
-import { TouchableOpacity, Text } from "react-native";
+import { TouchableOpacity, Text, TouchableOpacityProps } from "react-native";
 import { Book } from "../shared/types/book";
 import { formatPrice } from "../utils/formatPrice";
 
@@ -11,9 +11,10 @@ export function BookCard({
   price,
   identifier,
   categories,
-}: Partial<Book>) {
+  onPress,
+}: Partial<Book> & TouchableOpacityProps) {
   return (
-    <TouchableOpacity activeOpacity={0.9}>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
       <Card className="bg-teal-700 flex-col py-2 px-4 rounded-xl justify-start max-h-[130px] mb-12">
         <HStack className="w-full">
           <Text className="font-inter mr-auto text-xl text-white font-medium">

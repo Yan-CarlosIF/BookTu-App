@@ -6,6 +6,8 @@ import { FlatList, Text } from "react-native";
 import { useState } from "react";
 import { Select } from "@components/Select";
 import { BookCard } from "../components/BookCard";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 const BOOK_FILTERS = [
   { label: "A-Z", value: "asc" },
@@ -19,6 +21,8 @@ const BOOK_FILTERS = [
 type Filters = (typeof BOOK_FILTERS)[number]["value"];
 
 export function Books() {
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+
   const [selectedFilter, setSelectedFilter] = useState<Filters | undefined>(
     undefined
   );
@@ -47,6 +51,9 @@ export function Books() {
           keyExtractor={(item) => String(item)}
           renderItem={({ index }) => (
             <BookCard
+              onPress={() => {
+                navigate("bookDetails", { bookId: index.toString() });
+              }}
               key={index}
               categories={[
                 { id: "1", name: "categoria 1" },
