@@ -90,7 +90,7 @@ export function BookDetails() {
             className="mt-3"
             showsHorizontalScrollIndicator={false}
             renderItem={({ item: category }) => (
-              <View className="bg-teal-300/25 mr-4 items-center justify-center px-3 py-2 w-[100px] rounded-2xl">
+              <View className="bg-teal-300/25 mr-4 items-center justify-center px-3 py-2 w-fit rounded-2xl">
                 <Text className="text-sm text-teal-700">{category}</Text>
               </View>
             )}

@@ -5,7 +5,7 @@ import { Search } from "lucide-react-native";
 import { FlatList, Text } from "react-native";
 import { useState } from "react";
 import { Select } from "@components/Select";
-import { BookCard } from "../components/BookCard";
+import { BookCard } from "@components/BookCard";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useListBooks } from "../useCases/useListBooks";
@@ -44,12 +44,12 @@ export function Books() {
   return (
     <VStack className="flex-1">
       <Header title="Livros" />
-      <VStack className="px-7 flex-1">
+      <VStack className="px-7 bg-white flex-1">
         <Input
           value={search}
           onChangeText={setSearch}
           leftIcon={Search}
-          className="h-12 px-3 data-[focus=true]:border-teal-700"
+          className="h-12 border-gray-500 rounded-2xl px-3 data-[focus=true]:border-teal-600"
           placeholder="Buscar pelo título, autor ou identificador"
           rightIcon={
             <Select
@@ -62,7 +62,7 @@ export function Books() {
 
         <FlatList
           showsVerticalScrollIndicator={false}
-          className="mt-16 flex-1"
+          className="mt-12 flex-1"
           data={books}
           keyExtractor={({ id }) => id}
           renderItem={({ item: book }) => (

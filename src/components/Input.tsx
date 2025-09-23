@@ -54,7 +54,8 @@ export function Input({
           onChangeText={onChangeText}
           autoCapitalize="none"
           secureTextEntry={secureTextEntry}
-          className={`font-inter font-semibold text-gray-600 text-base `}
+          style={{ color: "#666666" }}
+          className={`font-inter font-semibold placeholder:text-gray-500 text-base`}
           placeholder={placeholder}
         />
         {rightIcon && rightIcon}
