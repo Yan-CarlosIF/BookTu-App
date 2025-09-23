@@ -6,6 +6,7 @@ import { Home } from "../screens/Home";
 import { Books } from "../screens/Books";
 import { BookDetails } from "../screens/BookDetails";
 import { Stock } from "../screens/Stock";
+import { Inventories } from "../screens/Inventories";
 
 type AppRoutes = {
   home: undefined;
@@ -14,6 +15,7 @@ type AppRoutes = {
     bookId: string;
   };
   stock: undefined;
+  inventories: undefined;
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
@@ -27,6 +29,7 @@ export function AppRoutes() {
       <Screen name="books" component={Books} />
       <Screen name="bookDetails" component={BookDetails} />
       <Screen name="stock" component={Stock} />
+      <Screen name="inventories" component={Inventories} />
     </Navigator>
   );
 }

@@ -12,6 +12,7 @@ import { BookCard } from "@components/BookCard";
 import { Text } from "react-native";
 import { Spinner } from "@/components/ui/spinner";
 import { useDebounce } from "../hooks/useDebounce";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Stock() {
   const { data: establishmentsData } = useGetAllEstablishments();
@@ -44,6 +45,8 @@ export function Stock() {
     return obj;
   }, [] as { label: string; value: string }[]);
 
+  const totalItems = stockItems.reduce((acc, item) => acc + item.quantity, 0);
+
   return (
     <VStack className="flex-1">
       <Header title="Estoque" />
@@ -63,9 +66,17 @@ export function Stock() {
           }
         />
 
+        <Text className="mt-8 flex items-center text-gray-800 text-lg font-poppins-medium">
+          Total:{" "}
+          {isFetching ? (
+            <Skeleton speed={2} className="w-5 h-4 rounded-sm" />
+          ) : (
+            <Text>{totalItems}</Text>
+          )}
+        </Text>
         <FlatList
           showsVerticalScrollIndicator={false}
-          className="mt-12 flex-1"
+          className="mt-3 flex-1"
           data={stockItems}
           keyExtractor={({ id }) => id}
           renderItem={({ item }) => (
