@@ -16,7 +16,7 @@ const Spinner = React.forwardRef<
 >(function Spinner(
   {
     className,
-    color,
+    color = "#0d9488",
     focusable = false,
     'aria-label': ariaLabel = 'loading',
     ...props

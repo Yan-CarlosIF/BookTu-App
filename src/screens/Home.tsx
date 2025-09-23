@@ -33,7 +33,7 @@ export function Home() {
             <Text className="text-sm font-poppins mt-3 text-white">Livros</Text>
           </Button>
           <Button
-            isDisabled
+            onPress={() => navigate("stock")}
             className="bg-teal-700 flex flex-col rounded-2xl w-[110px] h-[100px] items-center justify-center data-[active=true]:bg-teal-600"
           >
             <ClipboardList color="white" size={24} />

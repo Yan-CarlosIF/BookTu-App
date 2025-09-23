@@ -55,7 +55,7 @@ export function Input({
           autoCapitalize="none"
           secureTextEntry={secureTextEntry}
           style={{ color: "#666666" }}
-          className={`font-inter font-semibold placeholder:text-gray-500 text-base`}
+          className="font-inter font-semibold text-base"
           placeholder={placeholder}
         />
         {rightIcon && rightIcon}
