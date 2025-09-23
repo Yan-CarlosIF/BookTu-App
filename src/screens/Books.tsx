@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useListBooks } from "../useCases/useListBooks";
 import { Spinner } from "@/components/ui/spinner";
+import { useDebounce } from "../hooks/useDebounce";
 
 const BOOK_FILTERS = [
   { label: "A-Z", value: "asc" },
@@ -26,6 +27,7 @@ export function Books() {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search);
   const [selectedFilter, setSelectedFilter] = useState<Filters | undefined>(
     undefined
   );
@@ -37,7 +39,7 @@ export function Books() {
     isRefetching,
     refetch,
     isFetchingNextPage,
-  } = useListBooks(selectedFilter, search);
+  } = useListBooks(selectedFilter, debouncedSearch );
 
   const books = data?.pages.flatMap((page) => page.books) ?? [];
 

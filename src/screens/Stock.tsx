@@ -11,11 +11,13 @@ import { useListStocksItems } from "../useCases/useListStockItems";
 import { BookCard } from "@components/BookCard";
 import { Text } from "react-native";
 import { Spinner } from "@/components/ui/spinner";
+import { useDebounce } from "../hooks/useDebounce";
 
 export function Stock() {
   const { data: establishmentsData } = useGetAllEstablishments();
 
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search);
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>(
     undefined
   );
@@ -28,7 +30,7 @@ export function Stock() {
     refetch,
     isFetchingNextPage,
     isFetching,
-  } = useListStocksItems(selectedFilter, search);
+  } = useListStocksItems(selectedFilter, debouncedSearch);
 
   const stockItems = data?.pages.flatMap((page) => page.data) ?? [];
 

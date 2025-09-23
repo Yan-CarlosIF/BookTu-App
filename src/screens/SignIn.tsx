@@ -105,6 +105,7 @@ export function SignIn() {
                   label="Senha"
                   placeholder="******"
                   secureTextEntry={hidePassword}
+                  onSubmitEditing={handleSubmit(handleSignIn)}
                 />
               )}
             />
