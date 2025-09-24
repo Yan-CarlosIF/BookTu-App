@@ -8,17 +8,25 @@ import {
   SelectDragIndicatorWrapper,
   SelectDragIndicator,
   SelectItem,
+  ISelectInputProps,
 } from "@/components/ui/select";
-import { Funnel } from "lucide-react-native";
+import { Funnel, LucideIcon } from "lucide-react-native";
 import { useState } from "react";
+import { TextInputProps } from "react-native";
 
 type SelectProps<T extends string> = {
+  Input?: React.ForwardRefExoticComponent<
+    Omit<ISelectInputProps, "ref"> & React.RefAttributes<TextInputProps>
+  >;
+  Icon?: LucideIcon;
   selectedFilter: T | undefined;
   setSelectedFilter: React.Dispatch<React.SetStateAction<T | undefined>>;
   options: Readonly<{ label: string; value: T }[]>;
 };
 
 export function Select<T extends string>({
+  Icon,
+  Input,
   options,
   selectedFilter,
   setSelectedFilter,
@@ -35,14 +43,19 @@ export function Select<T extends string>({
     setIsSelectOpen(false);
   }
 
+  const labelSelected = options.find(
+    (option) => option.value === selectedFilter
+  )?.label;
+
   return (
-    <UISelect selectedValue={selectedFilter}>
+    <UISelect selectedValue={labelSelected}>
       <SelectTrigger
         onPress={() => setIsSelectOpen((prevState) => !prevState)}
-        className="border-0"
+        className={!Input ? "border-0" : "justify-between px-2 h-12"}
         size="md"
       >
-        <InputIcon as={Funnel} />
+        {Input && <Input placeholder="Selecione um Estabelecimento" />}
+        {Icon ? <Icon size={18} /> : <InputIcon as={Funnel} />}
       </SelectTrigger>
       <SelectPortal isOpen={isSelectOpen}>
         <SelectBackdrop onPress={() => setIsSelectOpen(false)} />
@@ -52,6 +65,7 @@ export function Select<T extends string>({
           </SelectDragIndicatorWrapper>
           {options.map(({ label, value }) => (
             <SelectItem
+              className={value === selectedFilter ? "bg-teal-300/15" : ""}
               onPress={() => handleSelectFilter(value)}
               key={value}
               label={label}

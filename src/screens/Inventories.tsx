@@ -12,9 +12,12 @@ import { InventoryCard } from "../components/InventoryCard";
 import { useListInventories } from "../useCases/useListInventories";
 import { Spinner } from "@/components/ui/spinner";
 import { Fab, FabIcon } from "@/components/ui/fab";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 export function Inventories() {
   const { data: establishmentsData } = useGetAllEstablishments();
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
@@ -88,6 +91,7 @@ export function Inventories() {
         placement="bottom center"
         size="lg"
         className="bg-teal-600 data-[active=true]:bg-teal-500"
+        onPress={() => navigate("inventoryActions", {})}
       >
         <FabIcon as={Plus} size={24} />
       </Fab>

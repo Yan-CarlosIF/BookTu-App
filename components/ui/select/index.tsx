@@ -172,7 +172,7 @@ const SelectTrigger = React.forwardRef<
   );
 });
 
-type ISelectInputProps = VariantProps<typeof selectInputStyle> &
+export type ISelectInputProps = VariantProps<typeof selectInputStyle> &
   React.ComponentProps<typeof UISelect.Input> & { className?: string };
 
 const SelectInput = React.forwardRef<
