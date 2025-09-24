@@ -7,15 +7,13 @@ import { VStack } from "@/components/ui/vstack";
 import { StockItem } from "../shared/types/stockItem";
 
 type BookCardProps = {
-  type: "book" | "stock";
+  isBook?: boolean;
   book: Book;
   stock?: StockItem;
   onPress?: () => void;
 };
 
-export function BookCard({ stock, book, onPress, type }: BookCardProps) {
-  const isBook = type === "book";
-
+export function BookCard({ stock, book, onPress, isBook = false }: BookCardProps) {
   function renderCategories() {
     const hasCategories = isBook && book.categories.length > 0;
 

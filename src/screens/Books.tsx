@@ -69,7 +69,7 @@ export function Books() {
           keyExtractor={({ id }) => id}
           renderItem={({ item: book }) => (
             <BookCard
-              type="book"
+              isBook
               onPress={() => navigate("bookDetails", { bookId: book.id })}
               book={book}
             />

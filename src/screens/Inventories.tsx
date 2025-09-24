@@ -2,7 +2,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { useState } from "react";
-import { Search } from "lucide-react-native";
+import { Plus, Search } from "lucide-react-native";
 import { useGetAllEstablishments } from "../useCases/useGetAllEstablishments";
 import { Loading } from "@components/Loading";
 import { useDebounce } from "../hooks/useDebounce";
@@ -11,6 +11,7 @@ import { FlatList, Text } from "react-native";
 import { InventoryCard } from "../components/InventoryCard";
 import { useListInventories } from "../useCases/useListInventories";
 import { Spinner } from "@/components/ui/spinner";
+import { Fab, FabIcon } from "@/components/ui/fab";
 
 export function Inventories() {
   const { data: establishmentsData } = useGetAllEstablishments();
@@ -83,6 +84,13 @@ export function Inventories() {
           }
         />
       </VStack>
+      <Fab
+        placement="bottom center"
+        size="lg"
+        className="bg-teal-600 data-[active=true]:bg-teal-500"
+      >
+        <FabIcon as={Plus} size={24} />
+      </Fab>
     </VStack>
   );
 }

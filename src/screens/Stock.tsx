@@ -79,9 +79,7 @@ export function Stock() {
           className="mt-3 flex-1"
           data={stockItems}
           keyExtractor={({ id }) => id}
-          renderItem={({ item }) => (
-            <BookCard type="stock" book={item.book} stock={item} />
-          )}
+          renderItem={({ item }) => <BookCard book={item.book} stock={item} />}
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.5}
           refreshing={isRefetching}

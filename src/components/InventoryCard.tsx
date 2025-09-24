@@ -71,7 +71,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
           <Text className="text-teal-600 text-xl font-bold">
             {inventory.total_quantity}
           </Text>{" "}
-          produtos
+          Produtos
         </Text>
       </View>
 
