@@ -36,6 +36,7 @@ export function Input({
   placeholder,
   leftIcon,
   rightIcon,
+  keyboardType,
   ...props
 }: InputProps) {
   return (
@@ -50,12 +51,13 @@ export function Input({
           </InputSlot>
         )}
         <InputField
+          keyboardType={keyboardType}
           value={value}
           onChangeText={onChangeText}
           autoCapitalize="none"
           secureTextEntry={secureTextEntry}
           style={{ color: "#666666" }}
-          className="font-inter font-semibold text-base"
+          className="font-inter font-normal text-base"
           placeholder={placeholder}
         />
         {rightIcon && rightIcon}

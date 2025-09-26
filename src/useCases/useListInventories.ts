@@ -14,7 +14,7 @@ export function useListInventories(sort?: string, search?: string) {
     queryKey: ["inventories", sort, search],
     queryFn: async ({ pageParam = 1 }) => {
       const { data } = await api.get<IResponse>("/inventories", {
-        params: { page: pageParam, sort, search },
+        params: { page: pageParam, establishmentId: sort, search },
       });
 
       return data;

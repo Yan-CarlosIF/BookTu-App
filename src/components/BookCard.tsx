@@ -8,12 +8,19 @@ import { StockItem } from "../shared/types/stockItem";
 
 type BookCardProps = {
   isBook?: boolean;
+  quantity?: number;
   book: Book;
   stock?: StockItem;
   onPress?: () => void;
 };
 
-export function BookCard({ stock, book, onPress, isBook = false }: BookCardProps) {
+export function BookCard({
+  stock,
+  book,
+  onPress,
+  isBook = false,
+  quantity,
+}: BookCardProps) {
   function renderCategories() {
     const hasCategories = isBook && book.categories.length > 0;
 
@@ -41,13 +48,17 @@ export function BookCard({ stock, book, onPress, isBook = false }: BookCardProps
   }
 
   function renderQuantityAndEstablishment() {
+    const hasQuantity = !!quantity;
+
+    const quantityValue = hasQuantity ? quantity : stock?.quantity;
+
     return (
       <VStack className="">
         <Text className="text-gray-800 font-medium text-ellipsis line-clamp-1 text-lg">
           {stock?.stock.establishment.name}
         </Text>
         <Text className="text-gray-600 font-poppins-semibold text-base">
-          {stock?.quantity} unidades
+          {quantityValue} unidade{quantityValue === 1 ? "" : "s"}
         </Text>
       </VStack>
     );
@@ -55,8 +66,8 @@ export function BookCard({ stock, book, onPress, isBook = false }: BookCardProps
 
   return (
     <TouchableOpacity
-      activeOpacity={isBook ? 0.7 : 1}
-      disabled={!isBook}
+      activeOpacity={onPress ? 0.7 : 1}
+      disabled={!onPress}
       onPress={onPress}
     >
       <HStack className="bg-white border border-gray-500 rounded-2xl p-4 mb-6 shadow-sm flex-row">

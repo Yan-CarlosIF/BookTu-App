@@ -2,29 +2,42 @@ import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
 import { useRoute } from "@react-navigation/native";
 import { Inventory } from "../shared/types/inventory";
-import { FlatList, Text } from "react-native";
+import { Alert, FlatList, Text } from "react-native";
 import { Select } from "@components/Select";
 import { useState } from "react";
 import { useGetAllEstablishments } from "../useCases/useGetAllEstablishments";
-import { ChevronDown, Search } from "lucide-react-native";
+import {
+  BrushCleaning,
+  ChevronDown,
+  MenuIcon,
+  Plus,
+} from "lucide-react-native";
 import { SelectInput } from "@/components/ui/select";
-import { Input } from "@components/Input";
 import { HStack } from "@/components/ui/hstack";
 import { BookCard } from "@components/BookCard";
 import { SwipeToDelete } from "@components/SwipeToDelete";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
+import { Icon } from "@/components/ui/icon";
+import { BookSelector } from "../components/BookSelector";
+import { Book } from "../shared/types/book";
+import { UpdateProductDialog } from "../components/UpdateProductDialog";
+import { useCreateInventory } from "../useCases/useCreateInventory";
 
 type RouteParams = {
   inventoryId?: string;
   inventory?: Inventory;
 };
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+
+export type InventoryItem = Book & {
+  quantity: number;
+};
 
 export function InventoryActions() {
+  const [editingBookId, setEditingBookId] = useState<string | null>(null);
+
   const { params } = useRoute() as { params: RouteParams };
   const isCreateAction = !params.inventoryId && !params.inventory;
-
-  const [search, setSearch] = useState("");
 
   const { data: establishmentsData } = useGetAllEstablishments();
 
@@ -43,11 +56,50 @@ export function InventoryActions() {
     return obj;
   }, [] as { label: string; value: string }[]);
 
-  const [selectedFilter, setSelectedFilter] = useState<string | undefined>(
-    initialEstablishment
-  );
+  const [selectedEstablishment, setSelectedEstablishment] = useState<
+    string | undefined
+  >(initialEstablishment);
 
-  const [books, setBooks] = useState([1, 2, 3, 4, 5]);
+  const [books, setBooks] = useState<InventoryItem[]>([] as InventoryItem[]);
+
+  const total = books.reduce((total, book) => {
+    return total + book.quantity;
+  }, 0);
+
+  function handleClearInventory() {
+    Alert.alert(
+      "Limpar inventário",
+      "Tem certeza que deseja limpar o inventário?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Limpar",
+          onPress: () => {
+            setBooks([]);
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  }
+
+  const { mutateAsync: createInventory } = useCreateInventory();
+
+  async function handleCreateInventory() {
+    if (isCreateAction) {
+      await createInventory({
+        establishment_id: selectedEstablishment ?? "",
+        total_quantity: total,
+        inventoryBooks: books.map((book) => ({
+          book_id: book.id,
+          quantity: book.quantity,
+        })),
+      });
+    }
+  }
 
   return (
     <VStack className="flex-1 bg-white">
@@ -57,82 +109,78 @@ export function InventoryActions() {
       <VStack className="px-6 flex-1 mt-7">
         <Select
           options={establishments ?? []}
-          selectedFilter={selectedFilter}
-          setSelectedFilter={setSelectedFilter}
+          selectedFilter={selectedEstablishment}
+          setSelectedFilter={setSelectedEstablishment}
           Icon={ChevronDown}
           Input={SelectInput}
         />
 
-        <Input
-          value={search}
-          onChangeText={setSearch}
-          leftIcon={Search}
-          className="h-12 border-gray-500 rounded-md px-3 data-[focus=true]:border-teal-600"
-          placeholder="Buscar pelo título ou identificador"
-        />
+        <BookSelector books={books} setBooks={setBooks} />
 
         <HStack className="mt-8 justify-between items-center">
           <Text className="text-2xl font-poppins-medium">Produtos</Text>
-          <Text className="text-xl">Total: 50</Text>
+          <Text className="text-xl">Total: {total}</Text>
         </HStack>
 
-        <AnimatedFlatList
-          layout={LinearTransition.springify()}
+        <FlatList
           className="mt-6"
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => String(item)}
           data={books}
-          renderItem={({ item }) => (
-            <SwipeToDelete
-              onDelete={() => {
-                setBooks(books.filter((book) => book !== item));
-              }}
-            >
-              <BookCard
-                stock={{
-                  quantity: 10,
-                  book_id: "dawdawdawdadaw",
-                  id: "dawdawdawdadaw",
-                  stock_id: "dawdawdawdadaw",
-                  book: {
-                    id: "dawdawdawdadaw",
-                    title: "Pataxó",
-                    author: "Alex Pereira",
-                    identifier: "CHAMA",
-                    price: 100,
-                    release_year: 2025,
-                    description: "",
-                    categories: [],
-                  },
-                  stock: {
-                    establishment_id: "dawdawdawdadaw",
-                    id: "dawdawdawdadaw",
-                    establishment: {
-                      id: "dawdawdawdadaw",
-                      name: "Pataxó",
-                      cep: "00000-000",
-                      city: "Pataxó",
-                      cnpj: "00000000000000",
-                      district: "Pataxó",
-                      state: "Pataxó",
-                      description: "",
-                    },
-                  },
+          keyExtractor={(item) => item.id}
+          renderItem={({ item: book }) => (
+            <>
+              <SwipeToDelete
+                onDelete={() => {
+                  setBooks(books.filter((b) => b !== book));
                 }}
-                book={{
-                  id: "dawdawdawdadaw",
-                  title: "Pataxó",
-                  author: "Alex Pereira",
-                  identifier: "CHAMA",
-                  price: 100,
-                  release_year: 2025,
-                  description: "",
-                  categories: [],
-                }}
+              >
+                <BookCard
+                  onPress={() => setEditingBookId(book.id)}
+                  quantity={book.quantity}
+                  book={book}
+                />
+              </SwipeToDelete>
+              <UpdateProductDialog
+                setBooks={setBooks}
+                book={book}
+                isOpen={editingBookId === book.id}
+                onClose={() => setEditingBookId(null)}
               />
-            </SwipeToDelete>
+            </>
           )}
         />
+        <Fab
+          onPress={handleCreateInventory}
+          isDisabled={selectedEstablishment === undefined}
+          placement="bottom center"
+          className="bg-teal-600 rounded-md data-[active=true]:bg-teal-500"
+        >
+          <FabLabel className="font-medium">Adicionar</FabLabel>
+          <FabIcon as={Plus} />
+        </Fab>
+        <Menu
+          offset={5}
+          trigger={({ ...triggerProps }) => (
+            <Fab
+              {...triggerProps}
+              size="lg"
+              className="bg-teal-600 data-[active=true]:bg-teal-500"
+            >
+              <FabIcon as={MenuIcon} />
+            </Fab>
+          )}
+        >
+          <MenuItem
+            onPress={handleClearInventory}
+            key="Limpar"
+            textValue="Limpar"
+          >
+            <Icon as={BrushCleaning} size="sm" className="mr-2 text-teal-600" />
+            <MenuItemLabel size="sm" className="text-gray-800">
+              Limpar
+            </MenuItemLabel>
+          </MenuItem>
+        </Menu>
       </VStack>
     </VStack>
   );

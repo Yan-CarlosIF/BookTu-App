@@ -5,7 +5,7 @@ interface HandleShowConfig {
   message: string;
   duration?: number;
   variant: "success" | "error";
-  closeButton?: boolean;
+  isClosable?: boolean;
 }
 
 type ToastContextType = {
@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     message,
     duration = 3000,
     variant,
-    closeButton = false,
+    isClosable: closeButton = false,
   }: HandleShowConfig) {
     setVariant(variant);
     setMessage(message);
