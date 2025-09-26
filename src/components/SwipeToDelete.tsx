@@ -8,14 +8,13 @@ import Animated, {
 import { ReactNode } from "react";
 import { Dimensions, TouchableOpacity, View } from "react-native";
 import { Trash } from "lucide-react-native";
-import { runOnJS } from "react-native-worklets";
 
 const END_POSITION = 120;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 type SwipeToDeleteProps = {
   children: ReactNode;
-  onDelete: () => void;
+  onDelete: () => boolean;
 };
 
 export function SwipeToDelete({ children, onDelete }: SwipeToDeleteProps) {
@@ -46,26 +45,28 @@ export function SwipeToDelete({ children, onDelete }: SwipeToDeleteProps) {
     opacity: -position.value / END_POSITION,
   }));
 
-  const handleDelete = () => {
+  const handleDeleteAnimation = () => {
     // anima o item para fora da tela
-    position.value = withTiming(
-      SCREEN_WIDTH,
-      { duration: 500, easing: Easing.out(Easing.exp) },
-      () => {
-        // só aqui remove do estado
-        runOnJS(onDelete)();
-      }
-    );
+    position.value = withTiming(SCREEN_WIDTH, {
+      duration: 500,
+      easing: Easing.out(Easing.exp),
+    });
   };
 
   return (
     <View className="relative">
       {/* BARRA VERMELHA ATRÁS */}
       <Animated.View
-        className="absolute right-0 top-0 bottom-0 mb-6 w-[160px] bg-red-500 items-end justify-center rounded-r-2xl"
+        className="absolute right-0 h-fit top-0 bottom-0 mb-6 w-[160px] bg-red-500 items-end justify-center rounded-r-2xl"
         style={[backgroundStyle]}
       >
-        <TouchableOpacity className="mr-12" onPress={handleDelete}>
+        <TouchableOpacity
+          className="mr-12"
+          onPress={() => {
+            const showDeleteAnimation = onDelete();
+            if (showDeleteAnimation) handleDeleteAnimation();
+          }}
+        >
           <Trash color="white" size={28} />
         </TouchableOpacity>
       </Animated.View>

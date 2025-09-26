@@ -159,6 +159,7 @@ export function InventoryActions() {
               <SwipeToDelete
                 onDelete={() => {
                   setBooks(books.filter((b) => b !== book));
+                  return true;
                 }}
               >
                 <BookCard

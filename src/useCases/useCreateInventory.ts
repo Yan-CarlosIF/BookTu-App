@@ -37,7 +37,6 @@ export function useCreateInventory() {
     },
 
     onError: (error: AxiosError<{ message: string }>) => {
-      console.log(error);
       const status = error.response?.status;
       const message =
         error.response?.data?.message || "Erro ao criar inventário";

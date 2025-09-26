@@ -68,14 +68,14 @@ export function BookCard({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.75}
+      className="h-fit mb-6"
       style={{
         borderWidth: 1,
         borderColor: "#D9D9D9",
         borderRadius: 16,
         padding: 16,
-        marginBottom: 24,
         flexDirection: "row",
-        backgroundColor: "transparent",
+        backgroundColor: "white",
         overflow: "hidden",
       }}
     >
