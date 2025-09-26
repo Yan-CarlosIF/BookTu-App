@@ -1,6 +1,6 @@
 import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Inventory } from "../shared/types/inventory";
 import { ActivityIndicator, Alert, FlatList, Text } from "react-native";
 import { Select } from "@components/Select";
@@ -23,6 +23,7 @@ import { BookSelector } from "../components/BookSelector";
 import { Book } from "../shared/types/book";
 import { UpdateProductDialog } from "../components/UpdateProductDialog";
 import { useCreateInventory } from "../useCases/useCreateInventory";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 type RouteParams = {
   inventoryId?: string;
@@ -36,12 +37,13 @@ export type InventoryItem = Book & {
 export function InventoryActions() {
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
 
+  const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
   const { params } = useRoute() as { params: RouteParams };
   const isCreateAction = !params.inventoryId && !params.inventory;
 
   const { data: establishmentsData } = useGetAllEstablishments();
 
-  let initialEstablishment = undefined;
+  let initialEstablishment = params.inventory?.establishment_id ?? undefined;
 
   const establishments = establishmentsData?.reduce((obj, establishment) => {
     obj.push({
@@ -101,9 +103,34 @@ export function InventoryActions() {
     }
   }
 
+  function handleNavigate() {
+    if (selectedEstablishment || books.length > 0) {
+      return Alert.alert(
+        "Voltar sem salvar",
+        "Tem certeza que deseja voltar sem salvar o inventário?",
+        [
+          {
+            text: "Cancelar",
+            style: "cancel",
+          },
+          {
+            text: "Voltar",
+            onPress: () => {
+              navigate("home");
+            },
+            style: "destructive",
+          },
+        ]
+      );
+    }
+
+    goBack();
+  }
+
   return (
     <VStack className="flex-1 bg-white">
       <Header
+        onPress={handleNavigate}
         title={isCreateAction ? "Criar Inventário" : "Editar Inventário"}
       />
       <VStack className="px-6 flex-1 mt-7">

@@ -48,7 +48,7 @@ export function Inventories() {
 
   return (
     <VStack className="flex-1">
-      <Header title="Inventários" />
+      <Header onPress={() => navigate("home")} title="Inventários" />
       <VStack className="px-6 bg-white flex-1">
         <Input
           value={search}
