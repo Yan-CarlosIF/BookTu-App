@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Pressable } from "react-native";
 import { BookOpen, Tag } from "lucide-react-native";
 import { Book } from "../shared/types/book";
 import { formatPrice } from "../utils/formatPrice";
@@ -65,12 +65,8 @@ export function BookCard({
   }
 
   return (
-    <TouchableOpacity
-      activeOpacity={onPress ? 0.7 : 1}
-      disabled={!onPress}
-      onPress={onPress}
-    >
-      <HStack className="bg-white border border-gray-500 rounded-2xl p-4 mb-6 shadow-sm flex-row">
+    <TouchableOpacity  activeOpacity={1} disabled={!onPress} onPress={onPress}>
+      <HStack className="bg-white border border-gray-500 rounded-2xl p-4 mb-6 shadow-sm flex-row data-[active=true]:bg-black">
         <View className="bg-teal-50 rounded-xl w-20 h-28 items-center justify-center mr-4 overflow-hidden">
           <BookOpen size={28} color="#0d9488" />
         </View>

@@ -2,7 +2,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
 import { useRoute } from "@react-navigation/native";
 import { Inventory } from "../shared/types/inventory";
-import { Alert, FlatList, Text } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Text } from "react-native";
 import { Select } from "@components/Select";
 import { useState } from "react";
 import { useGetAllEstablishments } from "../useCases/useGetAllEstablishments";
@@ -86,7 +86,7 @@ export function InventoryActions() {
     );
   }
 
-  const { mutateAsync: createInventory } = useCreateInventory();
+  const { mutateAsync: createInventory, isPending } = useCreateInventory();
 
   async function handleCreateInventory() {
     if (isCreateAction) {
@@ -151,12 +151,18 @@ export function InventoryActions() {
         />
         <Fab
           onPress={handleCreateInventory}
-          isDisabled={selectedEstablishment === undefined}
+          isDisabled={!selectedEstablishment || isPending}
           placement="bottom center"
-          className="bg-teal-600 rounded-md data-[active=true]:bg-teal-500"
+          className="bg-teal-600 w-32 rounded-md data-[active=true]:bg-teal-500"
         >
-          <FabLabel className="font-medium">Adicionar</FabLabel>
-          <FabIcon as={Plus} />
+          {isPending ? (
+            <ActivityIndicator color="#ccc" size="small" />
+          ) : (
+            <>
+              <FabLabel className="font-medium">Adicionar</FabLabel>
+              <FabIcon as={Plus} />
+            </>
+          )}
         </Fab>
         <Menu
           offset={5}
