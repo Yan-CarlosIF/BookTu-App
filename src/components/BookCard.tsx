@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Pressable } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { BookOpen, Tag } from "lucide-react-native";
 import { Book } from "../shared/types/book";
 import { formatPrice } from "../utils/formatPrice";
@@ -65,47 +65,58 @@ export function BookCard({
   }
 
   return (
-    <TouchableOpacity  activeOpacity={1} disabled={!onPress} onPress={onPress}>
-      <HStack className="bg-white border border-gray-500 rounded-2xl p-4 mb-6 shadow-sm flex-row data-[active=true]:bg-black">
-        <View className="bg-teal-50 rounded-xl w-20 h-28 items-center justify-center mr-4 overflow-hidden">
-          <BookOpen size={28} color="#0d9488" />
-        </View>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.75}
+      style={{
+        borderWidth: 1,
+        borderColor: "#D9D9D9",
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 24,
+        flexDirection: "row",
+        backgroundColor: "transparent",
+        overflow: "hidden",
+      }}
+    >
+      <View className="bg-teal-50 rounded-xl w-20 h-28 items-center justify-center mr-4 overflow-hidden">
+        <BookOpen size={28} color="#0d9488" />
+      </View>
 
-        <VStack className="flex-1 justify-between">
-          <VStack>
-            <HStack className="items-center mb-1">
-              <Text
-                className="text-base font-bold text-gray-800"
-                numberOfLines={2}
-              >
-                {book.title} •
-              </Text>
-
-              <Text className="text-gray-600 text-sm" numberOfLines={1}>
-                {" "}
-                {book.author}
-              </Text>
-            </HStack>
-
-            <Text className="text-teal-700 font-poppins-semibold text-xl w-fit">
-              {book.identifier}
+      <VStack className="flex-1 bg-transparent justify-between">
+        <VStack className="bg-transparent">
+          <HStack className="items-center mb-1">
+            <Text
+              className="text-base font-bold text-gray-800"
+              numberOfLines={2}
+            >
+              {book.title} •
             </Text>
-          </VStack>
 
-          {isBook && (
-            <HStack className="flex-row items-center mb-2">
-              <Text className="text-teal-600 font-bold text-base">
-                {formatPrice(book.price)}
-              </Text>
-              <Text className="text-gray-600 text-sm ml-1">
-                • {book.release_year}
-              </Text>
-            </HStack>
-          )}
+            <Text className="text-gray-600 text-sm" numberOfLines={1}>
+              {" "}
+              {book.author}
+            </Text>
+          </HStack>
 
-          {isBook ? renderCategories() : renderQuantityAndEstablishment()}
+          <Text className="text-teal-700 font-poppins-semibold text-xl w-fit">
+            {book.identifier}
+          </Text>
         </VStack>
-      </HStack>
+
+        {isBook && (
+          <HStack className="flex-row items-center mb-2">
+            <Text className="text-teal-600 font-bold text-base">
+              {formatPrice(book.price)}
+            </Text>
+            <Text className="text-gray-600 text-sm ml-1">
+              • {book.release_year}
+            </Text>
+          </HStack>
+        )}
+
+        {isBook ? renderCategories() : renderQuantityAndEstablishment()}
+      </VStack>
     </TouchableOpacity>
   );
 }
