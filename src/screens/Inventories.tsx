@@ -7,15 +7,13 @@ import { useGetAllEstablishments } from "../useCases/useGetAllEstablishments";
 import { Loading } from "@components/Loading";
 import { useDebounce } from "../hooks/useDebounce";
 import { Select } from "@components/Select";
-import { Alert, FlatList, Text } from "react-native";
+import { FlatList, Text } from "react-native";
 import { InventoryCard } from "../components/InventoryCard";
 import { useListInventories } from "../useCases/useListInventories";
 import { Spinner } from "@/components/ui/spinner";
 import { Fab, FabIcon } from "@/components/ui/fab";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
-import { SwipeToDelete } from "../components/SwipeToDelete";
-import { useDeleteInventory } from "../useCases/useDeleteInventory";
 
 export function Inventories() {
   const { data: establishmentsData } = useGetAllEstablishments();
@@ -35,7 +33,6 @@ export function Inventories() {
     refetch,
     isFetchingNextPage,
   } = useListInventories(selectedFilter, debouncedSearch);
-  const { mutateAsync: deleteInventoryFn } = useDeleteInventory();
 
   const inventories = data?.pages.flatMap((page) => page.data) ?? [];
 
@@ -48,28 +45,6 @@ export function Inventories() {
     });
     return obj;
   }, [] as { label: string; value: string }[]);
-
-  function handleDeleteInventory(inventoryId: string, identifier: number) {
-    let deleted = false;
-
-    Alert.alert(
-      "Deletar inventário",
-      `Tem certeza que deseja deletar o inventário ${identifier}?`,
-      [
-        {
-          text: "cancelar",
-          style: "cancel",
-        },
-        {
-          text: "deletar",
-          style: "destructive",
-          onPress: async () => await deleteInventoryFn(inventoryId),
-        },
-      ]
-    );
-
-    return deleted;
-  }
 
   return (
     <VStack className="flex-1">
@@ -89,20 +64,13 @@ export function Inventories() {
             />
           }
         />
-
         <FlatList
           showsVerticalScrollIndicator={false}
           className="mt-12"
           data={inventories}
           keyExtractor={({ id }) => id}
           renderItem={({ item: inventory }) => (
-            <SwipeToDelete
-              onDelete={() =>
-                handleDeleteInventory(inventory.id, inventory.identifier)
-              }
-            >
-              <InventoryCard inventory={inventory} />
-            </SwipeToDelete>
+            <InventoryCard inventory={inventory} />
           )}
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.5}

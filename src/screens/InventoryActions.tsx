@@ -24,6 +24,7 @@ import { Book } from "../shared/types/book";
 import { UpdateProductDialog } from "../components/UpdateProductDialog";
 import { useCreateInventory } from "../useCases/useCreateInventory";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { Spinner } from "@/components/ui/spinner";
 
 type RouteParams = {
   inventoryId?: string;
@@ -184,7 +185,7 @@ export function InventoryActions() {
           className="bg-teal-600 w-32 rounded-md data-[active=true]:bg-teal-500"
         >
           {isPending ? (
-            <ActivityIndicator color="#ccc" size="small" />
+            <Spinner size="small" />
           ) : (
             <>
               <FabLabel className="font-medium">Adicionar</FabLabel>
