@@ -9,14 +9,14 @@ import {
 import { Button, ButtonText } from "@/components/ui/button";
 import { Input } from "../components/Input";
 import { Text } from "react-native";
-import { InventoryItem } from "../screens/InventoryActions";
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InventoryBook } from "../shared/types/inventoryBook";
 
 type UpdateProductDialogProps = {
-  book: InventoryItem;
-  setBooks: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  book: InventoryBook;
+  setBooks: React.Dispatch<React.SetStateAction<InventoryBook[]>>;
   isOpen: boolean;
   onClose: () => void;
 };
@@ -36,7 +36,11 @@ export function UpdateProductDialog({
   setBooks,
   isOpen,
   onClose,
-  book: { id, quantity: defaultQuantity, title },
+  book: {
+    id,
+    quantity: defaultQuantity,
+    book: { title },
+  },
 }: UpdateProductDialogProps) {
   const {
     control,

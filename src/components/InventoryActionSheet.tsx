@@ -13,6 +13,8 @@ import { VStack } from "@/components/ui/vstack";
 import { Box, PenLine } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { Inventory } from "../shared/types/inventory";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 type InventoryActionSheetProps = {
   isOpen: boolean;
@@ -25,6 +27,13 @@ export function InventoryActionSheet({
   onClose,
   inventory,
 }: InventoryActionSheetProps) {
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+
+  function handleNavigateToEditInventory() {
+    navigate("inventoryActions", { inventory, inventoryId: inventory.id });
+    onClose();
+  }
+
   return (
     <Actionsheet isOpen={isOpen} onClose={onClose}>
       <ActionsheetBackdrop />
@@ -56,7 +65,7 @@ export function InventoryActionSheet({
         </ActionsheetItem>
         <ActionsheetItem
           className="bg-yellow-50 mt-6 border border-yellow-300 rounded-md h-24 data-[active=true]:bg-yellow-300/50"
-          onPress={onClose}
+          onPress={handleNavigateToEditInventory}
         >
           <HStack className="gap-4">
             <View className="items-center h-12 w-12 rounded-md justify-center bg-yellow-400/50">

@@ -76,6 +76,7 @@ export function Inventories() {
           onEndReachedThreshold={0.5}
           refreshing={isRefetching}
           onRefresh={refetch}
+          contentContainerStyle={!hasNextPage && { paddingBottom: 75 }}
           ListEmptyComponent={() => (
             <Text className="text-gray-600 text-2xl font-poppins text-center">
               Nenhum inventário encontrado...

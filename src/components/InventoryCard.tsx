@@ -211,11 +211,13 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
           </View>
         </Animated.View>
       </GestureDetector>
-      <InventoryActionSheet
-        inventory={inventory}
-        isOpen={showActionSheet}
-        onClose={handleCloseActionSheet}
-      />
+      {inventory.status === "unprocessed" && (
+        <InventoryActionSheet
+          inventory={inventory}
+          isOpen={showActionSheet}
+          onClose={handleCloseActionSheet}
+        />
+      )}
     </View>
   );
 }

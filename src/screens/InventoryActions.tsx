@@ -2,12 +2,13 @@ import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Inventory } from "../shared/types/inventory";
-import { ActivityIndicator, Alert, FlatList, Text } from "react-native";
+import { Alert, FlatList, Text, View } from "react-native";
 import { Select } from "@components/Select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetAllEstablishments } from "../useCases/useGetAllEstablishments";
 import {
   BrushCleaning,
+  Check,
   ChevronDown,
   MenuIcon,
   Plus,
@@ -25,10 +26,18 @@ import { UpdateProductDialog } from "../components/UpdateProductDialog";
 import { useCreateInventory } from "../useCases/useCreateInventory";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Spinner } from "@/components/ui/spinner";
+import { InventoryBook } from "../shared/types/inventoryBook";
+import { useEditInventory } from "../useCases/useEditInventory";
+import { AxiosError } from "axios";
+import { api } from "../lib/api";
 
 type RouteParams = {
   inventoryId?: string;
   inventory?: Inventory;
+};
+
+type IResponse = Inventory & {
+  books: InventoryBook[];
 };
 
 export type InventoryItem = Book & {
@@ -36,15 +45,19 @@ export type InventoryItem = Book & {
 };
 
 export function InventoryActions() {
+  const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
+
+  const [loading, setLoading] = useState(false);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
 
-  const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
-  const { params } = useRoute() as { params: RouteParams };
-  const isCreateAction = !params.inventoryId && !params.inventory;
+  const {
+    params: { inventoryId, inventory },
+  } = useRoute() as { params: RouteParams };
+  const isCreateAction = !inventoryId && !inventory;
 
   const { data: establishmentsData } = useGetAllEstablishments();
 
-  let initialEstablishment = params.inventory?.establishment_id ?? undefined;
+  let initialEstablishment = inventory?.establishment_id ?? undefined;
 
   const establishments = establishmentsData?.reduce((obj, establishment) => {
     obj.push({
@@ -52,7 +65,7 @@ export function InventoryActions() {
       value: establishment.id,
     });
 
-    if (params.inventory?.establishment_id === establishment.id) {
+    if (inventory?.establishment_id === establishment.id) {
       initialEstablishment = establishment.id;
     }
 
@@ -63,11 +76,16 @@ export function InventoryActions() {
     string | undefined
   >(initialEstablishment);
 
-  const [books, setBooks] = useState<InventoryItem[]>([] as InventoryItem[]);
+  const [inventoryBooks, setInventoryBooks] = useState<InventoryBook[]>([]);
 
-  const total = books.reduce((total, book) => {
+  const total = inventoryBooks.reduce((total, book) => {
     return total + book.quantity;
   }, 0);
+
+  const { mutateAsync: createInventory, isPending: isCreatePending } =
+    useCreateInventory();
+  const { mutateAsync: editInventory, isPending: isEditPending } =
+    useEditInventory();
 
   function handleClearInventory() {
     Alert.alert(
@@ -81,7 +99,7 @@ export function InventoryActions() {
         {
           text: "Limpar",
           onPress: () => {
-            setBooks([]);
+            setInventoryBooks([]);
           },
           style: "destructive",
         },
@@ -89,23 +107,41 @@ export function InventoryActions() {
     );
   }
 
-  const { mutateAsync: createInventory, isPending } = useCreateInventory();
-
   async function handleCreateInventory() {
     if (isCreateAction) {
       await createInventory({
         establishment_id: selectedEstablishment ?? "",
         total_quantity: total,
-        inventoryBooks: books.map((book) => ({
-          book_id: book.id,
-          quantity: book.quantity,
+        inventoryBooks: inventoryBooks.map((inventoryBook) => ({
+          book_id: inventoryBook.book_id,
+          quantity: inventoryBook.quantity,
         })),
       });
     }
   }
 
+  async function handleEditInventory() {
+    if (inventory) {
+      try {
+        await editInventory({
+          id: inventory.id,
+          establishment_id: selectedEstablishment ?? "",
+          inventoryBooks: inventoryBooks.map((inventoryBook) => ({
+            book_id: inventoryBook.book_id,
+            quantity: inventoryBook.quantity,
+          })),
+        });
+
+        navigate("inventories");
+      } catch (err) {
+        const error = err as AxiosError<{ message: string }>;
+        console.error(error.message);
+      }
+    }
+  }
+
   function handleNavigate() {
-    if (selectedEstablishment || books.length > 0) {
+    if (selectedEstablishment || inventoryBooks.length > 0) {
       return Alert.alert(
         "Voltar sem salvar",
         "Tem certeza que deseja voltar sem salvar o inventário?",
@@ -117,7 +153,7 @@ export function InventoryActions() {
           {
             text: "Voltar",
             onPress: () => {
-              navigate("home");
+              navigate("inventories");
             },
             style: "destructive",
           },
@@ -128,11 +164,32 @@ export function InventoryActions() {
     goBack();
   }
 
+  useEffect(() => {
+    if (!inventoryId) return;
+
+    (async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get<IResponse>(`inventories/${inventoryId}`);
+
+        setInventoryBooks(data.books);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
   return (
     <VStack className="flex-1 bg-white">
       <Header
         onPress={handleNavigate}
-        title={isCreateAction ? "Criar Inventário" : "Editar Inventário"}
+        title={
+          isCreateAction
+            ? "Criar Inventário"
+            : `Editar Inventário ${inventory?.identifier}`
+        }
       />
       <VStack className="px-6 flex-1 mt-7">
         <Select
@@ -143,53 +200,68 @@ export function InventoryActions() {
           Input={SelectInput}
         />
 
-        <BookSelector books={books} setBooks={setBooks} />
+        <BookSelector books={inventoryBooks} setBooks={setInventoryBooks} />
 
         <HStack className="mt-8 justify-between items-center">
           <Text className="text-2xl font-poppins-medium">Produtos</Text>
           <Text className="text-xl">Total: {total}</Text>
         </HStack>
 
-        <FlatList
-          className="mt-6"
-          showsVerticalScrollIndicator={false}
-          data={books}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item: book }) => (
-            <>
-              <SwipeToDelete
-                onDelete={() => {
-                  setBooks(books.filter((b) => b !== book));
-                  return true;
-                }}
-              >
-                <BookCard
-                  onPress={() => setEditingBookId(book.id)}
-                  quantity={book.quantity}
-                  book={book}
+        {!isCreateAction && loading && inventoryBooks.length === 0 ? (
+          <View className="flex-1 items-center justify-center">
+            <Spinner size="large" />
+          </View>
+        ) : (
+          <FlatList
+            className="mt-6"
+            showsVerticalScrollIndicator={false}
+            data={inventoryBooks}
+            keyExtractor={(item) => item.book.id}
+            contentContainerStyle={{ paddingBottom: 75 }}
+            renderItem={({ item: inventoryBook }) => (
+              <>
+                <SwipeToDelete
+                  onDelete={() => {
+                    setInventoryBooks(
+                      inventoryBooks.filter(
+                        (b) => b.book.id !== inventoryBook.book.id
+                      )
+                    );
+                    return true;
+                  }}
+                >
+                  <BookCard
+                    onPress={() => setEditingBookId(inventoryBook.id)}
+                    quantity={inventoryBook.quantity}
+                    book={inventoryBook.book}
+                  />
+                </SwipeToDelete>
+                <UpdateProductDialog
+                  setBooks={setInventoryBooks}
+                  book={inventoryBook}
+                  isOpen={editingBookId === inventoryBook.id}
+                  onClose={() => setEditingBookId(null)}
                 />
-              </SwipeToDelete>
-              <UpdateProductDialog
-                setBooks={setBooks}
-                book={book}
-                isOpen={editingBookId === book.id}
-                onClose={() => setEditingBookId(null)}
-              />
-            </>
-          )}
-        />
+              </>
+            )}
+          />
+        )}
         <Fab
-          onPress={handleCreateInventory}
-          isDisabled={!selectedEstablishment || isPending}
+          onPress={isCreateAction ? handleCreateInventory : handleEditInventory}
+          isDisabled={
+            !selectedEstablishment || isCreatePending || isEditPending
+          }
           placement="bottom center"
           className="bg-teal-600 w-32 rounded-md data-[active=true]:bg-teal-500"
         >
-          {isPending ? (
+          {isCreatePending || isEditPending ? (
             <Spinner size="small" />
           ) : (
             <>
-              <FabLabel className="font-medium">Adicionar</FabLabel>
-              <FabIcon as={Plus} />
+              <FabLabel className="font-medium">
+                {isCreateAction ? "Adicionar" : "Salvar"}
+              </FabLabel>
+              <FabIcon as={isCreateAction ? Plus : Check} />
             </>
           )}
         </Fab>

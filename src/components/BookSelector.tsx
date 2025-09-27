@@ -5,12 +5,12 @@ import { useGetAllBooks } from "../useCases/useGetAllBooks";
 import { Book } from "../shared/types/book";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Spinner } from "@/components/ui/spinner";
-import { InventoryItem } from "../screens/InventoryActions";
 import { Badge, BadgeText } from "@/components/ui/badge";
+import { InventoryBook } from "../shared/types/inventoryBook";
 
 type BookSelectorProps = {
-  books: InventoryItem[];
-  setBooks: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  books: InventoryBook[];
+  setBooks: React.Dispatch<React.SetStateAction<InventoryBook[]>>;
 };
 
 export function BookSelector({ books, setBooks }: BookSelectorProps) {
@@ -19,9 +19,13 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
   const { data, isLoading } = useGetAllBooks(search);
 
   function handleSelectBook(book: Book) {
-    const inventoryItem: InventoryItem = { ...book, quantity: 1 };
+    const inventoryItem = {
+      book: book,
+      quantity: 1,
+      book_id: book.id,
+    };
 
-    setBooks((prevBooks) => [...prevBooks, inventoryItem]);
+    setBooks((prevBooks) => [...prevBooks, inventoryItem as InventoryBook]);
     setSearch("");
   }
 
