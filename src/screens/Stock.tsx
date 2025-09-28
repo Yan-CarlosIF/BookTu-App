@@ -33,7 +33,7 @@ export function Stock() {
     isFetching,
   } = useListStocksItems(selectedFilter, debouncedSearch);
 
-  const stockItems = data?.pages.flatMap((page) => page.data) ?? [];
+  const stockItems = data?.items ?? [];
 
   if (!establishmentsData) return <Loading />;
 
@@ -44,8 +44,6 @@ export function Stock() {
     });
     return obj;
   }, [] as { label: string; value: string }[]);
-
-  const totalItems = stockItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <VStack className="flex-1">
@@ -71,7 +69,7 @@ export function Stock() {
           {isFetching ? (
             <Skeleton speed={2} className="w-5 h-4 rounded-sm" />
           ) : (
-            <Text>{totalItems}</Text>
+            <Text>{data?.total}</Text>
           )}
         </Text>
         <FlatList
