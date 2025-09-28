@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { InventoryBook } from "../shared/types/inventoryBook";
-import { api } from "../lib/api";
-import { Inventory } from "../shared/types/inventory";
+import { InventoryBook } from "../../shared/types/inventoryBook";
+import { api } from "../../lib/api";
+import { Inventory } from "../../shared/types/inventory";
 
 
 

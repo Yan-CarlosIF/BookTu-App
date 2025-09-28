@@ -1,24 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../lib/api";
-import { useToast } from "../hooks/useToast";
+import { useToast } from "../../hooks/useToast";
+import { api } from "../../lib/api";
 import { AxiosError } from "axios";
-import { useNavigation } from "@react-navigation/native";
-import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 interface IRequest {
+  id: string;
   establishment_id: string;
-  total_quantity: number;
   inventoryBooks: { book_id?: string; quantity?: number }[];
 }
 
-export function useCreateInventory() {
-  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
-  const queryClient = useQueryClient();
+export function useEditInventory() {
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: IRequest) => {
-      const { data: response } = await api.post("/inventories", data);
+    mutationFn: async ({ id, establishment_id, inventoryBooks }: IRequest) => {
+      const { data: response } = await api.put(`/inventories/${id}`, {
+        establishment_id,
+        inventoryBooks: [...inventoryBooks],
+      });
 
       return response;
     },
@@ -27,22 +27,20 @@ export function useCreateInventory() {
       queryClient.invalidateQueries({ queryKey: ["inventories"] });
 
       toast.show({
-        message: "Inventário criado com sucesso",
+        message: "Inventário editado com sucesso",
         variant: "success",
         duration: 3000,
         isClosable: true,
       });
-
-      navigate("inventories");
     },
 
     onError: (error: AxiosError<{ message: string }>) => {
       const status = error.response?.status;
       const message =
-        error.response?.data?.message || "Erro ao criar inventário";
+        error.response?.data?.message || "Erro ao editar inventário";
 
       toast.show({
-        message: status === 500 ? "Erro ao criar inventário" : message,
+        message: status === 500 ? "Erro ao editar inventário" : message,
         variant: "error",
         duration: 3000,
         isClosable: true,

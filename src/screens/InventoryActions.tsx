@@ -5,7 +5,9 @@ import { Inventory } from "../shared/types/inventory";
 import { Alert, FlatList, Text, View } from "react-native";
 import { Select } from "@components/Select";
 import { useEffect, useState } from "react";
-import { useGetAllEstablishments } from "../useCases/useGetAllEstablishments";
+import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
+import { useCreateInventory } from "@useCases/Inventory/useCreateInventory";
+import { useEditInventory } from "@useCases/Inventory/useEditInventory";
 import {
   BrushCleaning,
   Check,
@@ -23,12 +25,9 @@ import { Icon } from "@/components/ui/icon";
 import { BookSelector } from "../components/BookSelector";
 import { Book } from "../shared/types/book";
 import { UpdateProductDialog } from "../components/UpdateProductDialog";
-import { useCreateInventory } from "../useCases/useCreateInventory";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Spinner } from "@/components/ui/spinner";
 import { InventoryBook } from "../shared/types/inventoryBook";
-import { useEditInventory } from "../useCases/useEditInventory";
-import { AxiosError } from "axios";
 import { api } from "../lib/api";
 
 type RouteParams = {
@@ -122,21 +121,16 @@ export function InventoryActions() {
 
   async function handleEditInventory() {
     if (inventory) {
-      try {
-        await editInventory({
-          id: inventory.id,
-          establishment_id: selectedEstablishment ?? "",
-          inventoryBooks: inventoryBooks.map((inventoryBook) => ({
-            book_id: inventoryBook.book_id,
-            quantity: inventoryBook.quantity,
-          })),
-        });
+      await editInventory({
+        id: inventory.id,
+        establishment_id: selectedEstablishment ?? "",
+        inventoryBooks: inventoryBooks.map((inventoryBook) => ({
+          book_id: inventoryBook.book_id,
+          quantity: inventoryBook.quantity,
+        })),
+      });
 
-        navigate("inventories");
-      } catch (err) {
-        const error = err as AxiosError<{ message: string }>;
-        console.error(error.message);
-      }
+      navigate("inventories");
     }
   }
 

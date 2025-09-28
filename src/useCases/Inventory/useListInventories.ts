@@ -1,21 +1,22 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Book } from "../shared/types/book";
-import { api } from "../lib/api";
+import { Inventory } from "../../shared/types/inventory";
+import { api } from "../../lib/api";
 
 interface IResponse {
-  books: Book[];
+  data: Inventory[];
   total: number;
   page: number;
   lastPage: number;
 }
 
-export function useListBooks(sort?: string, search?: string) {
+export function useListInventories(sort?: string, search?: string) {
   return useInfiniteQuery({
-    queryKey: ["books", sort, search],
+    queryKey: ["inventories", sort, search],
     queryFn: async ({ pageParam = 1 }) => {
-      const { data } = await api.get<IResponse>("/books", {
-        params: { page: pageParam, sort, search },
+      const { data } = await api.get<IResponse>("/inventories", {
+        params: { page: pageParam, establishmentId: sort, search },
       });
+
       return data;
     },
     initialPageParam: 1,

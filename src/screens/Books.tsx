@@ -8,7 +8,7 @@ import { Select } from "@components/Select";
 import { BookCard } from "@components/BookCard";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
-import { useListBooks } from "../useCases/useListBooks";
+import { useListBooks } from "@useCases/Book/useListBooks";
 import { Spinner } from "@/components/ui/spinner";
 import { useDebounce } from "../hooks/useDebounce";
 

@@ -13,7 +13,7 @@ import {
 } from "lucide-react-native";
 import { formatPrice } from "../utils/formatPrice";
 import { useRoute } from "@react-navigation/native";
-import { useGetBook } from "../useCases/useGetBook";
+import { useGetBook } from "@useCases/Book/useGetBook";
 import { Loading } from "../components/Loading";
 
 export function BookDetails() {

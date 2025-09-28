@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../lib/api";
-import { Book } from "../shared/types/book";
+import { api } from "../../lib/api";
+import { Book } from "../../shared/types/book";
 
 export function useGetBook(bookId: string) {
   return useQuery({

@@ -1,7 +1,7 @@
 import { Input } from "./Input";
 import { useState } from "react";
 import { Search } from "lucide-react-native";
-import { useGetAllBooks } from "../useCases/useGetAllBooks";
+import { useGetAllBooks } from "@useCases/Book/useGetAllBooks";
 import { Book } from "../shared/types/book";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Spinner } from "@/components/ui/spinner";

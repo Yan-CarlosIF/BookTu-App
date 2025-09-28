@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../lib/api";
-import { useToast } from "../hooks/useToast";
+import { api } from "../../lib/api";
+import { useToast } from "../../hooks/useToast";
 import { AxiosError } from "axios";
 
 export function useDeleteInventory() {

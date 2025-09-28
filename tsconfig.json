@@ -4,6 +4,7 @@
     "strict": true,
     "paths": {
       "@/*": ["./*"],
+      "@useCases/*": ["./src/useCases/*"],
       "@components/*": ["./src/components/*"],
       "tailwind.config": ["./tailwind.config.js"]
     }

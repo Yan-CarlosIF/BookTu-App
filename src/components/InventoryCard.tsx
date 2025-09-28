@@ -10,7 +10,7 @@ import Animated, {
   useAnimatedStyle,
   Easing,
 } from "react-native-reanimated";
-import { useDeleteInventory } from "../useCases/useDeleteInventory";
+import { useDeleteInventory } from "@useCases/Inventory/useDeleteInventory";
 import { useState } from "react";
 
 import { runOnJS } from "react-native-worklets";
