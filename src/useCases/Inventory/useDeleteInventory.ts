@@ -20,7 +20,6 @@ export function useDeleteInventory() {
       toast.show({
         message: "Inventário excluído com sucesso",
         variant: "success",
-        isClosable: true,
       });
     },
 
@@ -33,7 +32,6 @@ export function useDeleteInventory() {
         message: status === 500 ? "Erro ao excluir inventário" : message,
         variant: "error",
         duration: 5000,
-        isClosable: true,
       });
     },
   });

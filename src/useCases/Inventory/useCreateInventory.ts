@@ -30,7 +30,6 @@ export function useCreateInventory() {
         message: "Inventário criado com sucesso",
         variant: "success",
         duration: 3000,
-        isClosable: true,
       });
 
       navigate("inventories");
@@ -45,7 +44,6 @@ export function useCreateInventory() {
         message: status === 500 ? "Erro ao criar inventário" : message,
         variant: "error",
         duration: 3000,
-        isClosable: true,
       });
     },
   });

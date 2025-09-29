@@ -52,7 +52,6 @@ export function SignIn() {
       toast.show({
         message: "Login ou senha inválidos.",
         variant: "error",
-        isClosable: true,
         duration: 5000,
       });
     }

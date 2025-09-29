@@ -1,11 +1,10 @@
-import { createContext, useState } from "react";
+import { createContext, useRef, useState } from "react";
 import { Toast } from "../components/Toast";
 
 interface HandleShowConfig {
   message: string;
   duration?: number;
   variant: "success" | "error";
-  isClosable?: boolean;
 }
 
 type ToastContextType = {
@@ -17,27 +16,31 @@ export const toastContext = createContext({} as ToastContextType);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("Inventário criado com sucesso");
   const [variant, setVariant] = useState<"success" | "error">("success");
-  const [showCloseButton, setShowCloseButton] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   function handleClose() {
     setVisible(false);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
   }
 
-  function handleShow({
-    message,
-    duration = 3000,
-    variant,
-    isClosable: closeButton = false,
-  }: HandleShowConfig) {
+  function handleShow({ message, duration = 3000, variant }: HandleShowConfig) {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     setVariant(variant);
     setMessage(message);
-    setShowCloseButton(closeButton);
     setVisible(true);
 
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setVisible(false);
+      timeoutRef.current = null;
     }, duration);
   }
 
@@ -48,7 +51,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         visible={visible}
         onClose={handleClose}
         message={message}
-        closeButton={showCloseButton}
       />
       {children}
     </toastContext.Provider>

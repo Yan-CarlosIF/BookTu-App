@@ -30,7 +30,6 @@ export function useEditInventory() {
         message: "Inventário editado com sucesso",
         variant: "success",
         duration: 3000,
-        isClosable: true,
       });
     },
 
@@ -43,7 +42,6 @@ export function useEditInventory() {
         message: status === 500 ? "Erro ao editar inventário" : message,
         variant: "error",
         duration: 3000,
-        isClosable: true,
       });
     },
   });

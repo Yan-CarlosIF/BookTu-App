@@ -22,7 +22,7 @@ import { Routes } from "./src/routes";
 import { ToastProvider } from "./src/contexts/ToastContext";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./src/lib/reactQuery";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -38,21 +38,21 @@ export default function App() {
 
   return (
     <SafeAreaView className="flex-1">
-    <GestureHandlerRootView>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <GluestackUIProvider mode="light">
-            <ToastProvider>
-              <StatusBar
-                style="auto"
-                translucent
-                backgroundColor="transparent"
-              />
-              {fontsLoaded ? <Routes /> : <Loading />}
-            </ToastProvider>
-          </GluestackUIProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <GestureHandlerRootView>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <GluestackUIProvider mode="light">
+              <ToastProvider>
+                <StatusBar
+                  style="auto"
+                  translucent
+                  backgroundColor="transparent"
+                />
+                {fontsLoaded ? <Routes /> : <Loading />}
+              </ToastProvider>
+            </GluestackUIProvider>
+          </AuthProvider>
+        </QueryClientProvider>
       </GestureHandlerRootView>
     </SafeAreaView>
   );
