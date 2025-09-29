@@ -22,6 +22,7 @@ type SelectProps<T extends string> = {
   selectedFilter: T | undefined;
   setSelectedFilter: React.Dispatch<React.SetStateAction<T | undefined>>;
   options: Readonly<{ label: string; value: T }[]>;
+  isDisabled?: boolean;
 };
 
 export function Select<T extends string>({
@@ -30,6 +31,7 @@ export function Select<T extends string>({
   options,
   selectedFilter,
   setSelectedFilter,
+  isDisabled,
 }: SelectProps<T>) {
   const [isSelectOpen, setIsSelectOpen] = useState(false);
 
@@ -50,6 +52,7 @@ export function Select<T extends string>({
   return (
     <UISelect selectedValue={labelSelected}>
       <SelectTrigger
+        disabled={isDisabled}
         onPress={() => setIsSelectOpen((prevState) => !prevState)}
         className={!Input ? "border-0" : "justify-between px-2 h-12"}
         size="md"

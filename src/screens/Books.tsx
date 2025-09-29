@@ -2,7 +2,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Header } from "../components/Header";
 import { Input } from "../components/Input";
 import { Search } from "lucide-react-native";
-import { FlatList, Text } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import { useState } from "react";
 import { Select } from "@components/Select";
 import { BookCard } from "@components/BookCard";
@@ -39,6 +39,7 @@ export function Books() {
     isRefetching,
     refetch,
     isFetchingNextPage,
+    isPending,
   } = useListBooks(selectedFilter, debouncedSearch);
 
   const books = data?.pages.flatMap((page) => page.books) ?? [];
@@ -62,31 +63,37 @@ export function Books() {
           }
         />
 
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          className="mt-12 flex-1"
-          data={books}
-          keyExtractor={({ id }) => id}
-          renderItem={({ item: book }) => (
-            <BookCard
-              isBook
-              onPress={() => navigate("bookDetails", { bookId: book.id })}
-              book={book}
-            />
-          )}
-          onEndReached={() => hasNextPage && fetchNextPage()}
-          onEndReachedThreshold={0.5}
-          refreshing={isRefetching}
-          onRefresh={refetch}
-          ListEmptyComponent={() => (
-            <Text className="text-gray-600 text-2xl font-poppins text-center">
-              Nenhum livro encontrado...
-            </Text>
-          )}
-          ListFooterComponent={
-            isFetchingNextPage ? <Spinner size="large" /> : null
-          }
-        />
+        {isPending ? (
+          <View className="flex-1 items-center justify-center">
+            <Spinner size="large" />
+          </View>
+        ) : (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            className="mt-12 flex-1"
+            data={books}
+            keyExtractor={({ id }) => id}
+            renderItem={({ item: book }) => (
+              <BookCard
+                isBook
+                onPress={() => navigate("bookDetails", { bookId: book.id })}
+                book={book}
+              />
+            )}
+            onEndReached={() => hasNextPage && fetchNextPage()}
+            onEndReachedThreshold={0.5}
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            ListEmptyComponent={() => (
+              <Text className="text-gray-600 text-2xl font-poppins text-center">
+                Nenhum livro encontrado...
+              </Text>
+            )}
+            ListFooterComponent={
+              isFetchingNextPage ? <Spinner size="large" /> : null
+            }
+          />
+        )}
       </VStack>
     </VStack>
   );

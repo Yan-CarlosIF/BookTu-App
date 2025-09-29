@@ -6,8 +6,7 @@ import { Select } from "@components/Select";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import { useListStocksItems } from "@useCases/useListStockItems";
 import { useState } from "react";
-import { Loading } from "../components/Loading";
-import { FlatList, View } from "react-native";
+import { FlatList } from "react-native";
 import { BookCard } from "@components/BookCard";
 import { Text } from "react-native";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,7 +14,8 @@ import { useDebounce } from "../hooks/useDebounce";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function Stock() {
-  const { data: establishmentsData } = useGetAllEstablishments();
+  const { data: establishmentsData, isPending: isPendingEstablishments } =
+    useGetAllEstablishments();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
@@ -30,20 +30,24 @@ export function Stock() {
     fetchNextPage,
     refetch,
     isFetchingNextPage,
-    isFetching,
+    isPending,
   } = useListStocksItems(selectedFilter, debouncedSearch);
 
   const stockItems = data?.items ?? [];
+  const totalItems = data?.total ?? 0;
 
-  if (!establishmentsData) return <Loading />;
+  let establishments: { label: string; value: string }[] = [];
 
-  const establishments = establishmentsData.reduce((obj, establishment) => {
-    obj.push({
-      label: establishment.name,
-      value: establishment.id,
-    });
-    return obj;
-  }, [] as { label: string; value: string }[]);
+  if (!isPendingEstablishments) {
+    establishments =
+      establishmentsData?.reduce((obj, establishment) => {
+        obj.push({
+          label: establishment.name,
+          value: establishment.id,
+        });
+        return obj;
+      }, [] as { label: string; value: string }[]) ?? [];
+  }
 
   return (
     <VStack className="flex-1">
@@ -57,6 +61,7 @@ export function Stock() {
           placeholder="Buscar pelo título do livro"
           rightIcon={
             <Select
+              isDisabled={isPendingEstablishments}
               options={establishments}
               selectedFilter={selectedFilter}
               setSelectedFilter={setSelectedFilter}
@@ -65,38 +70,41 @@ export function Stock() {
         />
 
         <Text className="mt-8 flex items-center text-gray-800 text-lg font-poppins-medium">
-          {isFetching ? (
+          {isPending ? (
             <Skeleton speed={2} className="w-6 h-4 rounded-sm" />
           ) : (
-            <Text>{data?.total}</Text>
+            <Text>{totalItems}</Text>
           )}{" "}
           Itens
         </Text>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          className="mt-3 flex-1"
-          data={stockItems}
-          keyExtractor={({ id }) => id}
-          renderItem={({ item }) => <BookCard book={item.book} stock={item} />}
-          onEndReached={() => hasNextPage && fetchNextPage()}
-          onEndReachedThreshold={0.5}
-          refreshing={isRefetching}
-          onRefresh={refetch}
-          ListEmptyComponent={() =>
-            isFetching ? (
-              <VStack className="flex-1 items-center justify-center">
-                <Spinner size="large" />
-              </VStack>
-            ) : (
+
+        {isPending ? (
+          <VStack className="flex-1 items-center justify-center">
+            <Spinner size="large" />
+          </VStack>
+        ) : (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            className="mt-3 flex-1"
+            data={stockItems}
+            keyExtractor={({ id }) => id}
+            renderItem={({ item }) => (
+              <BookCard book={item.book} stock={item} />
+            )}
+            onEndReached={() => hasNextPage && fetchNextPage()}
+            onEndReachedThreshold={0.5}
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            ListEmptyComponent={() => (
               <Text className="text-gray-600 text-2xl font-poppins text-center">
                 Nenhum livro encontrado...
               </Text>
-            )
-          }
-          ListFooterComponent={
-            isFetchingNextPage ? <Spinner size="large" /> : null
-          }
-        />
+            )}
+            ListFooterComponent={
+              isFetchingNextPage ? <Spinner size="large" /> : null
+            }
+          />
+        )}
       </VStack>
     </VStack>
   );
