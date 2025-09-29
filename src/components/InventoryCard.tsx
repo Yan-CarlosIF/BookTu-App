@@ -1,5 +1,20 @@
-import { View, Text, Dimensions, TouchableOpacity, Alert } from "react-native";
-import { Package, MapPin, Building2, Tag, Trash } from "lucide-react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  TouchableOpacity,
+  Alert,
+  Pressable,
+} from "react-native";
+import {
+  Package,
+  MapPin,
+  Building2,
+  Tag,
+  Trash,
+  CircleAlert,
+  CircleCheck,
+} from "lucide-react-native";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Inventory } from "../shared/types/inventory";
@@ -15,6 +30,9 @@ import { useState } from "react";
 
 import { runOnJS } from "react-native-worklets";
 import { InventoryActionSheet } from "./InventoryActionSheet";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { Icon } from "@/components/ui/icon";
 
 const END_POSITION = 120;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -24,6 +42,8 @@ type InventoryCardProps = {
 };
 
 export function InventoryCard({ inventory }: InventoryCardProps) {
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+
   const { mutateAsync: deleteInventoryFn } = useDeleteInventory();
 
   const [showActionSheet, setShowActionSheet] = useState(false);
@@ -103,7 +123,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "unprocessed":
-        return "bg-gray-100 border-gray-500";
+        return "bg-amber-100 border-amber-300";
       case "processed":
         return "bg-teal-100 border-teal-300";
       default:
@@ -139,7 +159,8 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
         gesture={Gesture.Simultaneous(panGesture, longPressGesture, tapGesture)}
       >
         <Animated.View style={[animatedStyle, { borderRadius: 16 }]}>
-          <View
+          <Pressable
+            onPress={() => navigate("inventoryDetails", { inventory })}
             collapsable={false}
             className="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-500"
           >
@@ -156,21 +177,34 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
                 </HStack>
               </View>
 
-              <View
-                className={`px-3 py-1 rounded-full border ${getStatusColor(
+              <HStack
+                className={`px-4 py-1 gap-1 items-center rounded-full border ${getStatusColor(
                   inventory.status
                 )}`}
               >
+                <Icon
+                  className={
+                    inventory.status === "processed"
+                      ? "text-teal-700"
+                      : "text-amber-600"
+                  }
+                  as={
+                    inventory.status === "unprocessed"
+                      ? CircleAlert
+                      : CircleCheck
+                  }
+                  size={12}
+                />
                 <Text
                   className={`text-xs font-medium ${
                     inventory.status === "processed"
                       ? "text-teal-700"
-                      : "text-gray-600"
+                      : "text-amber-600"
                   }`}
                 >
                   {getStatusText(inventory.status)}
                 </Text>
-              </View>
+              </HStack>
             </View>
 
             <View className="mb-3">
@@ -185,15 +219,15 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
               </Text>
             </View>
 
-            <VStack className="border-t border-gray-500 pt-3">
-              <HStack className="gap-2 items-center mb-2">
+            <VStack className="border-t gap-1 border-gray-500 pt-3">
+              <HStack className="gap-2 items-center">
                 <Building2 size={16} color="#0d9488" className="mr-2" />
                 <Text className="font-semibold text-sm text-gray-800">
                   {inventory.establishment.name}
                 </Text>
               </HStack>
 
-              <HStack className="gap-2 items-center mb-1">
+              <HStack className="gap-2 items-center">
                 <MapPin size={16} color="#0d9488" className="mr-2" />
                 <Text className="text-sm font-medium text-gray-800">
                   {inventory.establishment.city},{" "}
@@ -208,7 +242,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
                 </Text>
               </HStack>
             </VStack>
-          </View>
+          </Pressable>
         </Animated.View>
       </GestureDetector>
       {inventory.status === "unprocessed" && (

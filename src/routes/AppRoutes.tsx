@@ -9,6 +9,7 @@ import { Stock } from "../screens/Stock";
 import { Inventories } from "../screens/Inventories";
 import { Inventory } from "../shared/types/inventory";
 import { InventoryActions } from "../screens/InventoryActions";
+import InventoryDetailScreen from "../screens/InventoryDetails";
 
 type AppRoutes = {
   home: undefined;
@@ -18,6 +19,9 @@ type AppRoutes = {
   };
   stock: undefined;
   inventories: undefined;
+  inventoryDetails: {
+    inventory: Inventory;
+  };
   inventoryActions: {
     inventoryId?: string;
     inventory?: Inventory;
@@ -36,6 +40,7 @@ export function AppRoutes() {
       <Screen name="bookDetails" component={BookDetails} />
       <Screen name="stock" component={Stock} />
       <Screen name="inventories" component={Inventories} />
+      <Screen name="inventoryDetails" component={InventoryDetailScreen} />
       <Screen name="inventoryActions" component={InventoryActions} />
     </Navigator>
   );

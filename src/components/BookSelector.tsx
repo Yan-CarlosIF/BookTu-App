@@ -30,7 +30,8 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
   }
 
   const selectableBooks = data?.filter(
-    (book: Book) => !books.find((b) => b.id === book.id)
+    (book: Book) =>
+      !books.find((inventoryBook) => inventoryBook.book.id === book.id)
   );
 
   return (

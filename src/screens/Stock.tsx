@@ -65,12 +65,12 @@ export function Stock() {
         />
 
         <Text className="mt-8 flex items-center text-gray-800 text-lg font-poppins-medium">
-          Total:{" "}
           {isFetching ? (
-            <Skeleton speed={2} className="w-5 h-4 rounded-sm" />
+            <Skeleton speed={2} className="w-6 h-4 rounded-sm" />
           ) : (
             <Text>{data?.total}</Text>
-          )}
+          )}{" "}
+          Itens
         </Text>
         <FlatList
           showsVerticalScrollIndicator={false}
