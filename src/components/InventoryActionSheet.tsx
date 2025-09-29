@@ -17,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useProcessInventory } from "../useCases/Inventory/useProcessInventory";
 import { Spinner } from "@/components/ui/spinner";
+import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 type InventoryActionSheetProps = {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export function InventoryActionSheet({
 
   async function handleProcessInventory() {
     await processInventory(inventory.id);
+    await storageUpdateInventoryHistory(inventory);
     onClose();
   }
 

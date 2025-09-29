@@ -19,7 +19,8 @@ import { BookCard } from "../components/BookCard";
 import { Spinner } from "@/components/ui/spinner";
 import { useProcessInventory } from "../useCases/Inventory/useProcessInventory";
 import { Button } from "@components/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 export default function InventoryDetailScreen() {
   const { params } = useRoute();
@@ -44,6 +45,10 @@ export default function InventoryDetailScreen() {
   const handleProcessInventory = async () => {
     await processInventory(inventory.id);
     setIsProcessed("processed");
+    await storageUpdateInventoryHistory({
+      ...inventory,
+      status: "processed",
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -74,6 +79,14 @@ export default function InventoryDetailScreen() {
         return <Icon as={CheckCircle} size={16} className="text-teal-700" />;
     }
   };
+
+  useEffect(() => {
+    (async () =>
+      await storageUpdateInventoryHistory({
+        ...inventory,
+        status: isProcessed,
+      }))();
+  }, []);
 
   return (
     <VStack className="flex-1 bg-white">

@@ -8,13 +8,36 @@ import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useAuth } from "../hooks/useAuth";
 import { HistoryCard } from "../components/HistoryCard";
 import { Icon } from "@/components/ui/icon";
+import { useEffect, useState } from "react";
+import {
+  InventoryHistory,
+  storageGetInventoryHistory,
+} from "../storage/StorageInventoryHistory";
+import { formatDate } from "../utils/formatDate";
+import { Inventory } from "../shared/types/inventory";
 
 export function Home() {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+  const [inventoryHistory, setInventoryHistory] = useState<InventoryHistory[]>(
+    []
+  );
+
+  async function getInventoryHistory() {
+    const data = await storageGetInventoryHistory();
+    setInventoryHistory(data);
+  }
+
+  function handleNavigateToInventory(inventory: Inventory) {
+    navigate("inventoryDetails", { inventory: inventory });
+  }
 
   const { signOut } = useAuth();
 
   const handleSignOut = async () => await signOut();
+
+  useEffect(() => {
+    getInventoryHistory();
+  }, []);
 
   return (
     <VStack className="flex-1">
@@ -58,19 +81,23 @@ export function Home() {
 
         <FlatList
           className="mt-8"
-          data={[
-            { id: 1, processed: false },
-            { id: 2, processed: true },
-            { id: 3, processed: false },
-          ]}
-          keyExtractor={({ id }) => id.toString()}
-          renderItem={({ item: { processed } }) => (
+          data={inventoryHistory}
+          keyExtractor={({ id }) => id}
+          renderItem={({ item: inventory }) => (
             <HistoryCard
-              processed={processed}
-              establishmentName="Armazém central"
-              date="20/09/2025"
-              inventory={{ name: "Inventário 1", identifier: "1234" }}
+              onPress={() => handleNavigateToInventory(inventory)}
+              processed={inventory.status === "processed"}
+              establishmentName={inventory.establishment.name}
+              date={formatDate(inventory.date)}
+              inventoryName={`Inventário - ${inventory.identifier}`}
             />
+          )}
+          ListEmptyComponent={() => (
+            <VStack className="flex-1 items-center justify-center">
+              <Text className="text-gray-600 text-lg">
+                Nenhum inventário acessado...
+              </Text>
+            </VStack>
           )}
         />
       </VStack>

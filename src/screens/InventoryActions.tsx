@@ -29,6 +29,7 @@ import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Spinner } from "@/components/ui/spinner";
 import { InventoryBook } from "../shared/types/inventoryBook";
 import { api } from "../lib/api";
+import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 type RouteParams = {
   inventoryId?: string;
@@ -130,6 +131,7 @@ export function InventoryActions() {
         })),
       });
 
+      await storageUpdateInventoryHistory(inventory);
       navigate("inventories");
     }
   }

@@ -5,23 +5,25 @@ import { Button } from "./Button";
 import { Text } from "react-native";
 
 type HistoryCardProps = {
+  onPress: () => void;
   processed: boolean;
   establishmentName: string;
   date: string;
-  inventory: {
-    name: string;
-    identifier: string;
-  };
+  inventoryName: string;
 };
 
 export function HistoryCard({
+  onPress,
   date,
   establishmentName,
-  inventory,
+  inventoryName,
   processed,
 }: HistoryCardProps) {
   return (
-    <Button className="mb-8 border border-teal-400 justify-start flex h-[120px] w-full bg-teal-300/15 p-6 rounded-[10px] data-[active=true]:bg-teal-500/15 data-[active=true]:border-teal-500">
+    <Button
+      onPress={onPress}
+      className="mb-8 border border-teal-400 justify-start flex h-[120px] w-full bg-teal-300/15 p-6 rounded-[10px] data-[active=true]:bg-teal-500/15 data-[active=true]:border-teal-500"
+    >
       <VStack className="mr-auto">
         <HStack className="gap-3">
           <Text className="text-sm text-gray-800 font-poppins-semibold">
@@ -32,7 +34,7 @@ export function HistoryCard({
           </Text>
         </HStack>
         <Text className="text-2xl mb-2 font-poppins-bold text-gray-800">
-          {inventory.name} - {inventory.identifier}
+          {inventoryName}
         </Text>
         <Zap
           color={processed ? "teal" : "gray"}
