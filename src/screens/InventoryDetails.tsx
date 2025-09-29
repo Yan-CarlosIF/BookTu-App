@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import {
   Package,
   MapPin,
@@ -17,10 +17,14 @@ import { HStack } from "@/components/ui/hstack";
 import { useListInventoryBooks } from "@useCases/Inventory/useListInventoryBooks";
 import { BookCard } from "../components/BookCard";
 import { Spinner } from "@/components/ui/spinner";
+import { useProcessInventory } from "../useCases/Inventory/useProcessInventory";
+import { Button } from "@components/Button";
+import { useState } from "react";
 
 export default function InventoryDetailScreen() {
   const { params } = useRoute();
   const { inventory } = params as { inventory: Inventory };
+  const [isProcessed, setIsProcessed] = useState(inventory.status);
 
   const {
     data,
@@ -31,8 +35,16 @@ export default function InventoryDetailScreen() {
     isFetchingNextPage,
   } = useListInventoryBooks(inventory.id);
 
+  const { mutateAsync: processInventory, isPending: isProcessing } =
+    useProcessInventory();
+
   const books = data?.items ?? [];
   const totalItems = data?.total;
+
+  const handleProcessInventory = async () => {
+    await processInventory(inventory.id);
+    setIsProcessed("processed");
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,19 +96,19 @@ export default function InventoryDetailScreen() {
 
             <View
               className={`px-3 py-1 rounded-full border ${getStatusColor(
-                inventory.status
+                isProcessed
               )}`}
             >
               <View className="flex-row items-center">
-                {getStatusIcon(inventory.status)}
+                {getStatusIcon(isProcessed)}
                 <Text
                   className={`text-xs font-medium ${
-                    inventory.status === "unprocessed"
+                    isProcessed === "unprocessed"
                       ? "text-amber-600"
                       : "text-teal-700"
                   } ml-1`}
                 >
-                  {getStatusText(inventory.status)}
+                  {getStatusText(isProcessed)}
                 </Text>
               </View>
             </View>
@@ -177,14 +189,17 @@ export default function InventoryDetailScreen() {
           )}
         />
 
-        {inventory.status === "unprocessed" && (
-          <View className="mb-6">
-            <TouchableOpacity className="bg-[#2BADA1] rounded-xl py-4 items-center justify-center">
-              <Text className="text-white text-lg font-bold">
-                Processar Inventário
-              </Text>
-            </TouchableOpacity>
-          </View>
+        {(isProcessed === "unprocessed" || isProcessing) && (
+          <Button
+            disabled={isProcessing}
+            isLoading={isProcessing}
+            onPress={handleProcessInventory}
+            className="bg-[#2BADA1] mb-6 h-14 rounded-xl items-center justify-center data-[active=true]:bg-teal-400"
+          >
+            <Text className="text-white text-lg font-bold">
+              Processar Inventário
+            </Text>
+          </Button>
         )}
       </VStack>
     </VStack>
