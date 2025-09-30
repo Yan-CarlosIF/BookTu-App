@@ -1,5 +1,6 @@
-import { api } from "@/src/lib/api";
 import { useMutation } from "@tanstack/react-query";
+
+import { api } from "@/src/lib/api";
 
 interface LoginSchema {
   login: string;

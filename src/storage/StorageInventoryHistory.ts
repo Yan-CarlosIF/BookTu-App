@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { INVENTORY_HISTORY_STORAGE } from "./StorageConfig";
+
 import { Inventory } from "../shared/types/inventory";
+import { INVENTORY_HISTORY_STORAGE } from "./StorageConfig";
 
 export type InventoryHistory = Inventory & {
   date: string;

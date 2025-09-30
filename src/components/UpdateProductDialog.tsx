@@ -1,17 +1,19 @@
+import { Input } from "@components/Input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { Text } from "react-native";
+import { z } from "zod";
+
 import {
   AlertDialog,
   AlertDialogBackdrop,
-  AlertDialogContent,
-  AlertDialogHeader,
   AlertDialogBody,
+  AlertDialogContent,
   AlertDialogFooter,
+  AlertDialogHeader,
 } from "@/components/ui/alert-dialog";
 import { Button, ButtonText } from "@/components/ui/button";
-import { Input } from "../components/Input";
-import { Text } from "react-native";
-import { z } from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import { InventoryBook } from "../shared/types/inventoryBook";
 
 type UpdateProductDialogProps = {
@@ -64,7 +66,7 @@ export function UpdateProductDialog({
           };
         }
         return book;
-      })
+      }),
     );
 
     onClose();
@@ -75,7 +77,7 @@ export function UpdateProductDialog({
       <AlertDialogBackdrop />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <Text className="text-gray-800 font-poppins-semibold">
+          <Text className="font-poppins-semibold text-gray-800">
             Atualize a quantidade do produto{"\n"}
             <Text className="text-teal-600">{title}</Text>
           </Text>

@@ -1,5 +1,3 @@
-import { HStack } from "@/components/ui/hstack";
-import { Portal } from "@/components/ui/portal";
 import { CheckCircle, CircleAlert } from "lucide-react-native";
 import { useEffect } from "react";
 import { Text } from "react-native";
@@ -7,11 +5,14 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   FadeInUp,
   FadeOutUp,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
 } from "react-native-reanimated";
+
+import { HStack } from "@/components/ui/hstack";
+import { Portal } from "@/components/ui/portal";
 
 type ToastProps = {
   visible: boolean;
@@ -56,7 +57,7 @@ export function Toast({ message, visible, onClose, variant }: ToastProps) {
     if (visible) {
       translateY.value = withSpring(0);
     }
-  }, [visible]);
+  }, [visible, translateY]);
 
   if (!visible) return null;
 

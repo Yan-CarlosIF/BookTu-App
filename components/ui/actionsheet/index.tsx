@@ -1,28 +1,28 @@
 'use client';
-import React from 'react';
 import { H4 } from '@expo/html-elements';
 import { createActionsheet } from '@gluestack-ui/core/actionsheet/creator';
-import {
-  Pressable,
-  View,
-  Text,
-  ScrollView,
-  VirtualizedList,
-  FlatList,
-  SectionList,
-  PressableProps,
-  ViewStyle,
-} from 'react-native';
 import { PrimitiveIcon, UIIcon } from '@gluestack-ui/core/icon/creator';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
-import { cssInterop } from 'nativewind';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import {
-  Motion,
   AnimatePresence,
   createMotionAnimatedComponent,
+  Motion,
   MotionComponentProps,
 } from '@legendapp/motion';
+import { cssInterop } from 'nativewind';
+import React from 'react';
+import {
+  FlatList,
+  Pressable,
+  PressableProps,
+  ScrollView,
+  SectionList,
+  Text,
+  View,
+  ViewStyle,
+  VirtualizedList,
+} from 'react-native';
 
 const ItemWrapper = React.forwardRef<
   React.ComponentRef<typeof Pressable>,

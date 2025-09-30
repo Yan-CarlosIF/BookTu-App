@@ -2,16 +2,17 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { Home } from "../screens/Home";
-import { Books } from "../screens/Books";
-import { BookDetails } from "../screens/BookDetails";
-import { Stock } from "../screens/Stock";
-import { Inventories } from "../screens/Inventories";
-import { Inventory } from "../shared/types/inventory";
-import { InventoryActions } from "../screens/InventoryActions";
-import InventoryDetailScreen from "../screens/InventoryDetails";
 
-type AppRoutes = {
+import { BookDetails } from "../screens/BookDetails";
+import { Books } from "../screens/Books";
+import { Home } from "../screens/Home";
+import { Inventories } from "../screens/Inventories";
+import { InventoryActions } from "../screens/InventoryActions";
+import { InventoryDetailScreen } from "../screens/InventoryDetails";
+import { Stock } from "../screens/Stock";
+import { Inventory } from "../shared/types/inventory";
+
+type AppRoutesType = {
   home: undefined;
   books: undefined;
   bookDetails: {
@@ -28,9 +29,9 @@ type AppRoutes = {
   };
 };
 
-export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
+export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutesType>;
 
-const { Navigator, Screen } = createNativeStackNavigator<AppRoutes>();
+const { Navigator, Screen } = createNativeStackNavigator<AppRoutesType>();
 
 export function AppRoutes() {
   return (

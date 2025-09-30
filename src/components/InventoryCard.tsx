@@ -1,38 +1,39 @@
+import { InventoryActionSheet } from "@components/InventoryActionSheet";
+import { useNavigation } from "@react-navigation/native";
+import { useDeleteInventory } from "@useCases/Inventory/useDeleteInventory";
 import {
-  View,
-  Text,
-  Dimensions,
-  TouchableOpacity,
-  Alert,
-  Pressable,
-} from "react-native";
-import {
-  Package,
-  MapPin,
   Building2,
-  Tag,
-  Trash,
   CircleAlert,
   CircleCheck,
+  MapPin,
+  Package,
+  Tag,
+  Trash,
 } from "lucide-react-native";
-import { HStack } from "@/components/ui/hstack";
-import { VStack } from "@/components/ui/vstack";
-import { Inventory } from "../shared/types/inventory";
+import { useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  Easing,
+  useAnimatedStyle,
   useSharedValue,
   withTiming,
-  useAnimatedStyle,
-  Easing,
 } from "react-native-reanimated";
-import { useDeleteInventory } from "@useCases/Inventory/useDeleteInventory";
-import { useState } from "react";
-
 import { runOnJS } from "react-native-worklets";
-import { InventoryActionSheet } from "./InventoryActionSheet";
-import { useNavigation } from "@react-navigation/native";
-import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+
+import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
+import { VStack } from "@/components/ui/vstack";
+
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { Inventory } from "../shared/types/inventory";
 
 const END_POSITION = 120;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -116,7 +117,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
             });
           },
         },
-      ]
+      ],
     );
   };
 
@@ -146,7 +147,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
     <View className="relative">
       {/* Barra vermelha */}
       <Animated.View
-        className="absolute right-0 top-0 bottom-0 mb-6 w-[160px] bg-red-500 items-end justify-center rounded-r-2xl"
+        className="absolute bottom-0 right-0 top-0 mb-6 w-[160px] items-end justify-center rounded-r-2xl bg-red-500"
         style={backgroundStyle}
       >
         <TouchableOpacity onPress={handleDelete} className="mr-12">
@@ -162,11 +163,11 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
           <Pressable
             onPress={() => navigate("inventoryDetails", { inventory })}
             collapsable={false}
-            className="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-500"
+            className="mb-6 rounded-xl border border-gray-500 bg-white p-4 shadow-md"
           >
-            <View className="flex-row justify-between items-start mb-3">
+            <View className="mb-3 flex-row items-start justify-between">
               <View className="flex-1">
-                <HStack className="gap-2 items-center">
+                <HStack className="items-center gap-2">
                   <Package size={18} color="#2BADA1" className="mr-2" />
                   <Text
                     className="text-2xl font-bold text-gray-800"
@@ -178,8 +179,8 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
               </View>
 
               <HStack
-                className={`px-4 py-1 gap-1 items-center rounded-full border ${getStatusColor(
-                  inventory.status
+                className={`items-center gap-1 rounded-full border px-4 py-1 ${getStatusColor(
+                  inventory.status,
                 )}`}
               >
                 <Icon
@@ -212,22 +213,22 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
                 Quantidade Total:
               </Text>
               <Text className="text-lg text-gray-800">
-                <Text className="text-teal-600 text-xl font-bold">
+                <Text className="text-xl font-bold text-teal-600">
                   {inventory.total_quantity}
                 </Text>{" "}
                 Produtos
               </Text>
             </View>
 
-            <VStack className="border-t gap-1 border-gray-500 pt-3">
-              <HStack className="gap-2 items-center">
+            <VStack className="gap-1 border-t border-gray-500 pt-3">
+              <HStack className="items-center gap-2">
                 <Building2 size={16} color="#0d9488" className="mr-2" />
-                <Text className="font-semibold text-sm text-gray-800">
+                <Text className="text-sm font-semibold text-gray-800">
                   {inventory.establishment.name}
                 </Text>
               </HStack>
 
-              <HStack className="gap-2 items-center">
+              <HStack className="items-center gap-2">
                 <MapPin size={16} color="#0d9488" className="mr-2" />
                 <Text className="text-sm font-medium text-gray-800">
                   {inventory.establishment.city},{" "}
@@ -235,7 +236,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
                 </Text>
               </HStack>
 
-              <HStack className="gap-2 items-center">
+              <HStack className="items-center gap-2">
                 <Tag size={16} color="#0d9488" className="mr-2" />
                 <Text className="text-sm font-medium text-gray-800">
                   CNPJ: {inventory.establishment.cnpj}

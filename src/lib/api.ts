@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
+
 import { env } from "../env/env";
 
 type APIInstanceProps = AxiosInstance & {

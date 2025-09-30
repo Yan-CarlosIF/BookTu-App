@@ -1,18 +1,19 @@
-import { InputIcon } from "@/components/ui/input";
-import {
-  Select as UISelect,
-  SelectTrigger,
-  SelectPortal,
-  SelectBackdrop,
-  SelectContent,
-  SelectDragIndicatorWrapper,
-  SelectDragIndicator,
-  SelectItem,
-  ISelectInputProps,
-} from "@/components/ui/select";
 import { Funnel, LucideIcon } from "lucide-react-native";
 import { useState } from "react";
 import { TextInputProps } from "react-native";
+
+import { InputIcon } from "@/components/ui/input";
+import {
+  ISelectInputProps,
+  Select as UISelect,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+  SelectPortal,
+  SelectTrigger,
+} from "@/components/ui/select";
 
 type SelectProps<T extends string> = {
   Input?: React.ForwardRefExoticComponent<
@@ -21,7 +22,7 @@ type SelectProps<T extends string> = {
   Icon?: LucideIcon;
   selectedFilter: T | undefined;
   setSelectedFilter: React.Dispatch<React.SetStateAction<T | undefined>>;
-  options: Readonly<{ label: string; value: T }[]>;
+  options: readonly { label: string; value: T }[];
   isDisabled?: boolean;
 };
 

@@ -1,11 +1,12 @@
-import { createContext, useEffect, useState } from "react";
+import { useSignIn } from "@useCases/useSignIn";
+import { createContext, useCallback,useEffect, useState } from "react";
+
+import { api } from "../lib/api";
 import {
   storageGetAuthToken,
   storageRemoveAuthToken,
   storageSetAuthToken,
 } from "../storage/StorageAuthToken";
-import { api } from "../lib/api";
-import { useSignIn } from "@useCases/useSignIn";
 
 type AuthContextType = {
   token: string | null;
@@ -31,10 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(token);
   }
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     await storageRemoveAuthToken();
     setToken(null);
-  }
+  }, []);
 
   useEffect(() => {
     (async () => {

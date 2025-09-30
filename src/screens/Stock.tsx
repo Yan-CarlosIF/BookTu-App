@@ -1,17 +1,18 @@
-import { VStack } from "@/components/ui/vstack";
+import { BookCard } from "@components/BookCard";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
-import { Search } from "lucide-react-native";
 import { Select } from "@components/Select";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import { useListStocksItems } from "@useCases/useListStockItems";
+import { Search } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList } from "react-native";
-import { BookCard } from "@components/BookCard";
-import { Text } from "react-native";
-import { Spinner } from "@/components/ui/spinner";
-import { useDebounce } from "../hooks/useDebounce";
+import { FlatList, Text } from "react-native";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { VStack } from "@/components/ui/vstack";
+
+import { useDebounce } from "../hooks/useDebounce";
 
 export function Stock() {
   const { data: establishmentsData, isPending: isPendingEstablishments } =
@@ -20,7 +21,7 @@ export function Stock() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const {
@@ -40,24 +41,27 @@ export function Stock() {
 
   if (!isPendingEstablishments) {
     establishments =
-      establishmentsData?.reduce((obj, establishment) => {
-        obj.push({
-          label: establishment.name,
-          value: establishment.id,
-        });
-        return obj;
-      }, [] as { label: string; value: string }[]) ?? [];
+      establishmentsData?.reduce(
+        (obj, establishment) => {
+          obj.push({
+            label: establishment.name,
+            value: establishment.id,
+          });
+          return obj;
+        },
+        [] as { label: string; value: string }[],
+      ) ?? [];
   }
 
   return (
     <VStack className="flex-1">
       <Header title="Estoque" />
-      <VStack className="px-6 flex-1 bg-white">
+      <VStack className="flex-1 bg-white px-6">
         <Input
           value={search}
           onChangeText={setSearch}
           leftIcon={Search}
-          className="h-12 border-gray-500 rounded-2xl px-3 data-[focus=true]:border-teal-600"
+          className="h-12 rounded-2xl border-gray-500 px-3 data-[focus=true]:border-teal-600"
           placeholder="Buscar pelo título do livro"
           rightIcon={
             <Select
@@ -69,9 +73,9 @@ export function Stock() {
           }
         />
 
-        <Text className="mt-8 flex items-center text-gray-800 text-lg font-poppins-medium">
+        <Text className="mt-8 flex items-center font-poppins-medium text-lg text-gray-800">
           {isPending ? (
-            <Skeleton speed={2} className="w-6 h-4 rounded-sm" />
+            <Skeleton speed={2} className="h-4 w-6 rounded-sm" />
           ) : (
             <Text>{totalItems}</Text>
           )}{" "}
@@ -96,7 +100,7 @@ export function Stock() {
             refreshing={isRefetching}
             onRefresh={refetch}
             ListEmptyComponent={() => (
-              <Text className="text-gray-600 text-2xl font-poppins text-center">
+              <Text className="text-center font-poppins text-2xl text-gray-600">
                 Nenhum livro encontrado...
               </Text>
             )}

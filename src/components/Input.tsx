@@ -1,21 +1,21 @@
+import { CircleAlert, LucideIcon } from "lucide-react-native";
+
 import {
   FormControl,
-  FormControlLabel,
-  FormControlLabelText,
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
 } from "@/components/ui/form-control";
 import {
-  InputField,
-  Input as InputBase,
-  IInputProps,
   IInputFieldProps,
+  IInputProps,
+  Input as InputBase,
+  InputField,
   InputIcon,
   InputSlot,
 } from "@/components/ui/input";
-
-import { CircleAlert, LucideIcon } from "lucide-react-native";
 
 type InputProps = {
   rightIcon?: React.ReactNode;
@@ -57,7 +57,7 @@ export function Input({
           autoCapitalize="none"
           secureTextEntry={secureTextEntry}
           style={{ color: "#666666" }}
-          className="font-inter font-normal text-base"
+          className="font-inter text-base font-normal"
           placeholder={placeholder}
         />
         {rightIcon && rightIcon}

@@ -1,13 +1,13 @@
-import { VStack } from "@/components/ui/vstack";
+import { BookCard } from "@components/BookCard";
+import { BookSelector } from "@components/BookSelector";
 import { Header } from "@components/Header";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { Inventory } from "../shared/types/inventory";
-import { Alert, Text, View } from "react-native";
 import { Select } from "@components/Select";
-import { useEffect, useState } from "react";
-import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
+import { SwipeToDelete } from "@components/SwipeToDelete";
+import { UpdateProductDialog } from "@components/UpdateProductDialog";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useCreateInventory } from "@useCases/Inventory/useCreateInventory";
 import { useEditInventory } from "@useCases/Inventory/useEditInventory";
+import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import {
   BrushCleaning,
   Check,
@@ -15,22 +15,24 @@ import {
   MenuIcon,
   Plus,
 } from "lucide-react-native";
-import { SelectInput } from "@/components/ui/select";
-import { HStack } from "@/components/ui/hstack";
-import { BookCard } from "@components/BookCard";
-import { SwipeToDelete } from "@components/SwipeToDelete";
-import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
-import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
-import { Icon } from "@/components/ui/icon";
-import { BookSelector } from "../components/BookSelector";
-import { Book } from "../shared/types/book";
-import { UpdateProductDialog } from "../components/UpdateProductDialog";
-import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
-import { Spinner } from "@/components/ui/spinner";
-import { InventoryBook } from "../shared/types/inventoryBook";
-import { api } from "../lib/api";
-import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
+import { useEffect, useState } from "react";
+import { Alert, Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
+
+import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
+import { HStack } from "@/components/ui/hstack";
+import { Icon } from "@/components/ui/icon";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
+import { SelectInput } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { VStack } from "@/components/ui/vstack";
+
+import { api } from "../lib/api";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { Book } from "../shared/types/book";
+import { Inventory } from "../shared/types/inventory";
+import { InventoryBook } from "../shared/types/inventoryBook";
+import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 type RouteParams = {
   inventoryId?: string;
@@ -60,18 +62,21 @@ export function InventoryActions() {
 
   let initialEstablishment = inventory?.establishment_id ?? undefined;
 
-  const establishments = establishmentsData?.reduce((obj, establishment) => {
-    obj.push({
-      label: establishment.name,
-      value: establishment.id,
-    });
+  const establishments = establishmentsData?.reduce(
+    (obj, establishment) => {
+      obj.push({
+        label: establishment.name,
+        value: establishment.id,
+      });
 
-    if (inventory?.establishment_id === establishment.id) {
-      initialEstablishment = establishment.id;
-    }
+      if (inventory?.establishment_id === establishment.id) {
+        initialEstablishment = establishment.id;
+      }
 
-    return obj;
-  }, [] as { label: string; value: string }[]);
+      return obj;
+    },
+    [] as { label: string; value: string }[],
+  );
 
   const [selectedEstablishment, setSelectedEstablishment] = useState<
     string | undefined
@@ -104,7 +109,7 @@ export function InventoryActions() {
           },
           style: "destructive",
         },
-      ]
+      ],
     );
   }
 
@@ -154,7 +159,7 @@ export function InventoryActions() {
             },
             style: "destructive",
           },
-        ]
+        ],
       );
     }
 
@@ -163,7 +168,7 @@ export function InventoryActions() {
 
   function handleDeleteBook(bookId: string) {
     setInventoryBooks((prev) =>
-      prev.filter((inventoryBook) => inventoryBook.book.id !== bookId)
+      prev.filter((inventoryBook) => inventoryBook.book.id !== bookId),
     );
   }
 
@@ -182,7 +187,7 @@ export function InventoryActions() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [inventoryId]);
 
   return (
     <VStack className="flex-1 bg-white">
@@ -194,7 +199,7 @@ export function InventoryActions() {
             : `Editar Inventário ${inventory?.identifier}`
         }
       />
-      <VStack className="px-6 flex-1 mt-7">
+      <VStack className="mt-7 flex-1 px-6">
         <Select
           options={establishments ?? []}
           selectedFilter={selectedEstablishment}
@@ -205,8 +210,8 @@ export function InventoryActions() {
 
         <BookSelector books={inventoryBooks} setBooks={setInventoryBooks} />
 
-        <HStack className="mt-8 justify-between items-center">
-          <Text className="text-2xl font-poppins-medium">Produtos</Text>
+        <HStack className="mt-8 items-center justify-between">
+          <Text className="font-poppins-medium text-2xl">Produtos</Text>
           <Text className="text-xl">Total: {total}</Text>
         </HStack>
 
@@ -249,7 +254,7 @@ export function InventoryActions() {
             !selectedEstablishment || isCreatePending || isEditPending
           }
           placement="bottom center"
-          className="bg-teal-600 w-32 rounded-md data-[active=true]:bg-teal-500"
+          className="w-32 rounded-md bg-teal-600 data-[active=true]:bg-teal-500"
         >
           {isCreatePending || isEditPending ? (
             <Spinner size="small" />

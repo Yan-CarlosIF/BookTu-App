@@ -1,18 +1,19 @@
+import {
+  getBreakPointValue,
+  useBreakpointValue,
+} from '@gluestack-ui/utils/hooks';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
+import { cssInterop } from 'nativewind';
 import React, {
-  useState,
   createContext,
+  forwardRef,
   useContext,
   useMemo,
-  forwardRef,
+  useState,
 } from 'react';
-import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
-import { View, Dimensions, Platform, ViewProps } from 'react-native';
-import { gridStyle, gridItemStyle } from './styles';
-import { cssInterop } from 'nativewind';
-import {
-  useBreakpointValue,
-  getBreakPointValue,
-} from '@gluestack-ui/utils/hooks';
+import { Dimensions, Platform, View, ViewProps } from 'react-native';
+
+import { gridItemStyle,gridStyle } from './styles';
 const { width: DEVICE_WIDTH } = Dimensions.get('window');
 const GridContext = createContext<any>({});
 function arrangeChildrenIntoRows({

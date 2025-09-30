@@ -1,3 +1,6 @@
+import { Trash } from "lucide-react-native";
+import { ReactNode } from "react";
+import { Dimensions, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -5,9 +8,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { ReactNode } from "react";
-import { Dimensions, TouchableOpacity, View } from "react-native";
-import { Trash } from "lucide-react-native";
 import { runOnJS } from "react-native-worklets";
 
 const END_POSITION = 120;
@@ -57,7 +57,7 @@ export function SwipeToDelete({ children, onDelete }: SwipeToDeleteProps) {
       },
       () => {
         runOnJS(onDelete)();
-      }
+      },
     );
   }
 
@@ -65,7 +65,7 @@ export function SwipeToDelete({ children, onDelete }: SwipeToDeleteProps) {
     <View className="relative">
       {/* BARRA VERMELHA ATRÁS */}
       <Animated.View
-        className="absolute right-0 h-fit top-0 bottom-0 mb-6 w-[160px] bg-red-500 items-end justify-center rounded-r-2xl"
+        className="absolute bottom-0 right-0 top-0 mb-6 h-fit w-[160px] items-end justify-center rounded-r-2xl bg-red-500"
         style={[backgroundStyle]}
       >
         <TouchableOpacity className="mr-12" onPress={handleDeleteItem}>

@@ -1,16 +1,18 @@
-import { VStack } from "@/components/ui/vstack";
-import { Header } from "../components/Header";
-import { Input } from "../components/Input";
-import { Search } from "lucide-react-native";
-import { FlatList, Text, View } from "react-native";
-import { useState } from "react";
-import { Select } from "@components/Select";
 import { BookCard } from "@components/BookCard";
+import { Header } from "@components/Header";
+import { Input } from "@components/Input";
+import { Select } from "@components/Select";
 import { useNavigation } from "@react-navigation/native";
-import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useListBooks } from "@useCases/Book/useListBooks";
+import { Search } from "lucide-react-native";
+import { useState } from "react";
+import { FlatList, Text, View } from "react-native";
+
 import { Spinner } from "@/components/ui/spinner";
+import { VStack } from "@/components/ui/vstack";
+
 import { useDebounce } from "../hooks/useDebounce";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 const BOOK_FILTERS = [
   { label: "A-Z", value: "asc" },
@@ -29,7 +31,7 @@ export function Books() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
   const [selectedFilter, setSelectedFilter] = useState<Filters | undefined>(
-    undefined
+    undefined,
   );
 
   const {
@@ -47,12 +49,12 @@ export function Books() {
   return (
     <VStack className="flex-1">
       <Header title="Livros" />
-      <VStack className="px-6 bg-white flex-1">
+      <VStack className="flex-1 bg-white px-6">
         <Input
           value={search}
           onChangeText={setSearch}
           leftIcon={Search}
-          className="h-12 border-gray-500 rounded-2xl px-3 data-[focus=true]:border-teal-600"
+          className="h-12 rounded-2xl border-gray-500 px-3 data-[focus=true]:border-teal-600"
           placeholder="Buscar pelo título, autor ou identificador"
           rightIcon={
             <Select
@@ -85,7 +87,7 @@ export function Books() {
             refreshing={isRefetching}
             onRefresh={refetch}
             ListEmptyComponent={() => (
-              <Text className="text-gray-600 text-2xl font-poppins text-center">
+              <Text className="text-center font-poppins text-2xl text-gray-600">
                 Nenhum livro encontrado...
               </Text>
             )}

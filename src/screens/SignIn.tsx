@@ -1,20 +1,22 @@
+import { Button } from "@components/Button";
+import { Input } from "@components/Input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   Keyboard,
   KeyboardAvoidingView,
+  Platform,
   Text,
   TouchableWithoutFeedback,
-  Platform,
 } from "react-native";
-import { VStack } from "@/components/ui/vstack";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
-import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
-import { useState } from "react";
-import { InputIcon, InputSlot } from "@/components/ui/input";
-import { useAuth } from "../hooks/useAuth";
-import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+
+import { InputIcon, InputSlot } from "@/components/ui/input";
+import { VStack } from "@/components/ui/vstack";
+
+import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 
 const signInFormSchema = z.object({
@@ -64,12 +66,12 @@ export function SignIn() {
       keyboardVerticalOffset={0}
     >
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <VStack className="flex-1 w-full items-center px-[45px] justify-center bg-white">
-          <Text className="text-5xl font-poppins-bold">BookTu</Text>
-          <Text className="font-inter font-semibold text-2xl mt-14">
+        <VStack className="w-full flex-1 items-center justify-center bg-white px-[45px]">
+          <Text className="font-poppins-bold text-5xl">BookTu</Text>
+          <Text className="mt-14 font-inter text-2xl font-semibold">
             Iniciar sessão
           </Text>
-          <VStack className="mt-14 gap-7 w-full">
+          <VStack className="mt-14 w-full gap-7">
             <Controller
               name="login"
               control={control}
@@ -79,7 +81,7 @@ export function SignIn() {
                   value={value}
                   onChangeText={onChange}
                   error={errors.login?.message}
-                  className="h-[50px] px-4 bg-gray-300 border-gray-500 group-data data-[focus=true]:border-teal-700"
+                  className="group-data h-[50px] border-gray-500 bg-gray-300 px-4 data-[focus=true]:border-teal-700"
                   label="Login"
                   placeholder="Login"
                 />
@@ -101,7 +103,7 @@ export function SignIn() {
                       <InputIcon as={hidePassword ? Eye : EyeOff} size={20} />
                     </InputSlot>
                   }
-                  className="h-[50px] px-4 bg-gray-300 border-gray-500 data-[focus=true]:border-teal-700"
+                  className="h-[50px] border-gray-500 bg-gray-300 px-4 data-[focus=true]:border-teal-700"
                   label="Senha"
                   placeholder="******"
                   secureTextEntry={hidePassword}
@@ -112,9 +114,9 @@ export function SignIn() {
             <Button
               isLoading={isLoading}
               onPress={handleSubmit(handleSignIn)}
-              className="bg-teal-700 h-14 mt-16 data-[active=true]:bg-teal-600"
+              className="mt-16 h-14 bg-teal-700 data-[active=true]:bg-teal-600"
             >
-              <Text className="font-inter font-bold text-xl text-white">
+              <Text className="font-inter text-xl font-bold text-white">
                 Iniciar sessão
               </Text>
             </Button>

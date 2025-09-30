@@ -1,19 +1,21 @@
-import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
-import { useState } from "react";
-import { Plus, Search } from "lucide-react-native";
-import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
-import { useListInventories } from "@useCases/Inventory/useListInventories";
-import { useDebounce } from "../hooks/useDebounce";
 import { Select } from "@components/Select";
-import { Text, View } from "react-native";
-import { InventoryCard } from "../components/InventoryCard";
-import { Spinner } from "@/components/ui/spinner";
-import { Fab, FabIcon } from "@/components/ui/fab";
 import { useNavigation } from "@react-navigation/native";
-import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { useListInventories } from "@useCases/Inventory/useListInventories";
+import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
+import { Plus, Search } from "lucide-react-native";
+import { useState } from "react";
+import { Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
+
+import { Fab, FabIcon } from "@/components/ui/fab";
+import { Spinner } from "@/components/ui/spinner";
+import { VStack } from "@/components/ui/vstack";
+
+import { InventoryCard } from "../components/InventoryCard";
+import { useDebounce } from "../hooks/useDebounce";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 export function Inventories() {
   const { data: establishmentsData, isPending: isPendingEstablishments } =
@@ -23,7 +25,7 @@ export function Inventories() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const {
@@ -42,24 +44,27 @@ export function Inventories() {
 
   if (!isPendingEstablishments) {
     establishments =
-      establishmentsData?.reduce((obj, establishment) => {
-        obj.push({
-          label: establishment.name,
-          value: establishment.id,
-        });
-        return obj;
-      }, [] as { label: string; value: string }[]) ?? [];
+      establishmentsData?.reduce(
+        (obj, establishment) => {
+          obj.push({
+            label: establishment.name,
+            value: establishment.id,
+          });
+          return obj;
+        },
+        [] as { label: string; value: string }[],
+      ) ?? [];
   }
 
   return (
     <VStack className="flex-1">
       <Header onPress={() => navigate("home")} title="Inventários" />
-      <VStack className="px-6 bg-white flex-1">
+      <VStack className="flex-1 bg-white px-6">
         <Input
           value={search}
           onChangeText={setSearch}
           leftIcon={Search}
-          className="h-12 border-gray-500 rounded-2xl px-3 data-[focus=true]:border-teal-600"
+          className="h-12 rounded-2xl border-gray-500 px-3 data-[focus=true]:border-teal-600"
           placeholder="Buscar pelo título, autor ou identificador"
           rightIcon={
             <Select
@@ -72,7 +77,7 @@ export function Inventories() {
         />
 
         {isPending ? (
-          <View className="flex-1 justify-center items-center">
+          <View className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </View>
         ) : (
@@ -91,7 +96,7 @@ export function Inventories() {
             onRefresh={refetch}
             contentContainerStyle={!hasNextPage && { paddingBottom: 75 }}
             ListEmptyComponent={() => (
-              <Text className="text-gray-600 text-2xl font-poppins text-center">
+              <Text className="text-center font-poppins text-2xl text-gray-600">
                 Nenhum inventário encontrado...
               </Text>
             )}

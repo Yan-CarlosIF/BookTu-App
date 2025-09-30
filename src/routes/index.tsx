@@ -1,8 +1,9 @@
 import { NavigationContainer } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useAuth } from "../hooks/useAuth";
 import { AppRoutes } from "./AppRoutes";
 import { AuthRoutes } from "./AuthRoutes";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../hooks/useAuth";
 
 export function Routes() {
   const { token } = useAuth();

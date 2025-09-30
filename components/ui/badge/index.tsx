@@ -1,15 +1,13 @@
 'use client';
-import React from 'react';
-import { Text, View } from 'react-native';
 import { PrimitiveIcon, UIIcon } from '@gluestack-ui/core/icon/creator';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
-import {
-  withStyleContext,
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
+import { tva ,
   useStyleContext,
+  withStyleContext,
 } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
-import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
-
+import React from 'react';
+import { Text, View } from 'react-native';
 import { Svg } from 'react-native-svg';
 const SCOPE = 'BADGE';
 

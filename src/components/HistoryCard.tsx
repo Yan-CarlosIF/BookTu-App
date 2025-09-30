@@ -1,23 +1,25 @@
-import { Pressable, Text } from "react-native";
+import { TapGesture } from "@components/TapGesture";
 import {
-  Package,
+  Building2,
   Calendar,
   CheckCircle,
   Clock,
-  Building2,
+  Package,
 } from "lucide-react-native";
-import { formatDate } from "../utils/formatDate";
-import { InventoryHistory } from "../storage/StorageInventoryHistory";
+import { Pressable, Text } from "react-native";
+
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
-import { TapGesture } from "./TapGesture";
+
+import { InventoryHistory } from "../storage/StorageInventoryHistory";
+import { formatDate } from "../utils/formatDate";
 
 interface HistoryCardProps {
   item: InventoryHistory;
   onPress?: () => void;
 }
 
-export default function HistoryCard({ item, onPress }: HistoryCardProps) {
+export function HistoryCard({ item, onPress }: HistoryCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "processed":
@@ -54,15 +56,15 @@ export default function HistoryCard({ item, onPress }: HistoryCardProps) {
   return (
     <TapGesture>
       <Pressable
-        className="bg-white rounded-xl shadow-lg p-4 mb-5 border border-gray-500"
+        className="mb-5 rounded-xl border border-gray-500 bg-white p-4 shadow-lg"
         onPress={onPress}
       >
         {/* Header with ID and Status */}
-        <HStack className=" justify-between items-start mb-3">
+        <HStack className="mb-3 items-start justify-between">
           <HStack className="flex-row items-center">
             <Icon as={Package} size={18} className="mr-2 text-[#2BADA1]" />
             <Text
-              className="text-lg font-poppins-semibold text-gray-800"
+              className="font-poppins-semibold text-lg text-gray-800"
               numberOfLines={1}
             >
               Inventário - {item.identifier}
@@ -70,8 +72,8 @@ export default function HistoryCard({ item, onPress }: HistoryCardProps) {
           </HStack>
 
           <HStack
-            className={`px-2 py-1 w-32 rounded-full border justify-center items-center ${getStatusColor(
-              item.status
+            className={`w-32 items-center justify-center rounded-full border px-2 py-1 ${getStatusColor(
+              item.status,
             )}`}
           >
             {getStatusIcon(item.status)}
@@ -86,7 +88,7 @@ export default function HistoryCard({ item, onPress }: HistoryCardProps) {
         </HStack>
 
         {/* Establishment Name */}
-        <HStack className=" items-center mb-3">
+        <HStack className="mb-3 items-center">
           <Icon as={Building2} size={16} color="#2BADA1" className="mr-2" />
           <Text className="text-gray-800" numberOfLines={1}>
             {item.establishment.name}
@@ -94,11 +96,11 @@ export default function HistoryCard({ item, onPress }: HistoryCardProps) {
         </HStack>
 
         {/* Date */}
-        <HStack className="border-t border-gray-100 pt-3 items-center">
+        <HStack className="items-center border-t border-gray-100 pt-3">
           <Icon as={Calendar} size={14} color="#2BADA1" className="mr-2" />
           <Text className="text-sm text-gray-800">
             Acessado em:{" "}
-            <Text className="text-[#2BADA1] font-medium">
+            <Text className="font-medium text-[#2BADA1]">
               {formatDate(item.date)}
             </Text>
           </Text>

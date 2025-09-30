@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Book } from "../../shared/types/book";
+
 import { api } from "../../lib/api";
+import { Book } from "../../shared/types/book";
 
 interface IResponse {
   books: Book[];

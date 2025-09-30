@@ -1,28 +1,30 @@
-import { View, Text, FlatList } from "react-native";
-import {
-  Package,
-  MapPin,
-  Building2,
-  Tag,
-  CheckCircle,
-  AlertCircle,
-  Fingerprint,
-} from "lucide-react-native";
-import { Inventory } from "../shared/types/inventory";
-import { useRoute } from "@react-navigation/native";
-import { VStack } from "@/components/ui/vstack";
-import { Header } from "@components/Header";
-import { Icon } from "@/components/ui/icon";
-import { HStack } from "@/components/ui/hstack";
-import { useListInventoryBooks } from "@useCases/Inventory/useListInventoryBooks";
-import { BookCard } from "../components/BookCard";
-import { Spinner } from "@/components/ui/spinner";
-import { useProcessInventory } from "../useCases/Inventory/useProcessInventory";
+import { BookCard } from "@components/BookCard";
 import { Button } from "@components/Button";
+import { Header } from "@components/Header";
+import { useRoute } from "@react-navigation/native";
+import { useListInventoryBooks } from "@useCases/Inventory/useListInventoryBooks";
+import { useProcessInventory } from "@useCases/Inventory/useProcessInventory";
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle,
+  Fingerprint,
+  MapPin,
+  Package,
+  Tag,
+} from "lucide-react-native";
 import { useEffect, useState } from "react";
+import { FlatList, Text, View } from "react-native";
+
+import { HStack } from "@/components/ui/hstack";
+import { Icon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
+import { VStack } from "@/components/ui/vstack";
+
+import { Inventory } from "../shared/types/inventory";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
-export default function InventoryDetailScreen() {
+export function InventoryDetailScreen() {
   const { params } = useRoute();
   const { inventory } = params as { inventory: Inventory };
   const [processedStatus, setProcessedStatus] = useState(inventory.status);
@@ -87,17 +89,17 @@ export default function InventoryDetailScreen() {
         ...inventory,
         status: processedStatus,
       }))();
-  }, []);
+  }, [inventory, processedStatus]);
 
   return (
     <VStack className="flex-1 bg-white">
       <Header title="Detalhes do Inventário" />
 
       <VStack className="flex-1 px-4">
-        <VStack className="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-500 mt-6">
-          <HStack className="justify-between items-start mb-4">
+        <VStack className="mb-6 mt-6 rounded-2xl border border-gray-500 bg-white p-5 shadow-sm">
+          <HStack className="mb-4 items-start justify-between">
             <View className="flex-1">
-              <HStack className="flex-row gap-1 items-center">
+              <HStack className="flex-row items-center gap-1">
                 <Package size={20} color="#2BADA1" className="mr-2" />
                 <Text
                   className="text-xl font-bold text-gray-800"
@@ -109,8 +111,8 @@ export default function InventoryDetailScreen() {
             </View>
 
             <View
-              className={`px-3 py-1 rounded-full border ${getStatusColor(
-                processedStatus
+              className={`rounded-full border px-3 py-1 ${getStatusColor(
+                processedStatus,
               )}`}
             >
               <View className="flex-row items-center">
@@ -130,7 +132,7 @@ export default function InventoryDetailScreen() {
 
           {/* Quantity */}
           <View className="mb-4">
-            <Text className="text-base text-gray-800 font-medium">
+            <Text className="text-base font-medium text-gray-800">
               Quantidade Total:
             </Text>
             <Text className="text-2xl font-bold text-teal-600">
@@ -139,29 +141,29 @@ export default function InventoryDetailScreen() {
           </View>
 
           {/* Establishment Info */}
-          <VStack className="border-t gap-2 border-gray-500 pt-3">
-            <HStack className="gap-2 items-center">
+          <VStack className="gap-2 border-t border-gray-500 pt-3">
+            <HStack className="items-center gap-2">
               <Building2 size={18} color="#0d9488" className="mr-2" />
-              <Text className="font-semibold text-base text-gray-800">
+              <Text className="text-base font-semibold text-gray-800">
                 {inventory.establishment.name}
               </Text>
             </HStack>
 
-            <HStack className="gap-2 items-center">
+            <HStack className="items-center gap-2">
               <MapPin size={18} color="#0d9488" className="mr-2" />
               <Text className="text-base font-medium text-gray-800">
                 {inventory.establishment.city}, {inventory.establishment.state}
               </Text>
             </HStack>
 
-            <HStack className="gap-2 items-center">
+            <HStack className="items-center gap-2">
               <Fingerprint size={18} color="#0d9488" className="mr-2" />
               <Text className="text-base font-medium text-gray-800">
                 CNPJ: {inventory.establishment.cnpj}
               </Text>
             </HStack>
 
-            <HStack className="gap-2 items-center">
+            <HStack className="items-center gap-2">
               <Tag size={18} color="#0d9488" className="mr-2" />
               <Text className="text-base font-medium text-gray-800">
                 CEP: {inventory.establishment.cep}
@@ -171,11 +173,11 @@ export default function InventoryDetailScreen() {
         </VStack>
 
         {/* Books Section */}
-        <HStack className="flex-row items-center justify-between mb-4">
+        <HStack className="mb-4 flex-row items-center justify-between">
           <Text className="text-lg font-bold text-gray-800">
             Livros no Inventário
           </Text>
-          <Text className="text-teal-600 font-medium">{totalItems} itens</Text>
+          <Text className="font-medium text-teal-600">{totalItems} itens</Text>
         </HStack>
 
         {isPending ? (
@@ -193,7 +195,7 @@ export default function InventoryDetailScreen() {
             onEndReached={() => hasNextPage && fetchNextPage()}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => (
-              <Text className="text-gray-600 text-2xl font-poppins text-center">
+              <Text className="text-center font-poppins text-2xl text-gray-600">
                 Inventário vazio...
               </Text>
             )}
@@ -214,9 +216,9 @@ export default function InventoryDetailScreen() {
             disabled={isProcessing}
             isLoading={isProcessing}
             onPress={handleProcessInventory}
-            className="bg-[#2BADA1] mb-6 h-14 rounded-xl items-center justify-center data-[active=true]:bg-teal-400"
+            className="mb-6 h-14 items-center justify-center rounded-xl bg-[#2BADA1] data-[active=true]:bg-teal-400"
           >
-            <Text className="text-white text-lg font-bold">
+            <Text className="text-lg font-bold text-white">
               Processar Inventário
             </Text>
           </Button>

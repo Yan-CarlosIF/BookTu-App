@@ -1,11 +1,13 @@
-import { Input } from "./Input";
-import { useState } from "react";
-import { Search } from "lucide-react-native";
+import { Input } from "@components/Input";
 import { useGetAllBooks } from "@useCases/Book/useGetAllBooks";
-import { Book } from "../shared/types/book";
-import { View, Text, Pressable, ScrollView } from "react-native";
-import { Spinner } from "@/components/ui/spinner";
+import { Search } from "lucide-react-native";
+import { useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+
 import { Badge, BadgeText } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+
+import { Book } from "../shared/types/book";
 import { InventoryBook } from "../shared/types/inventoryBook";
 
 type BookSelectorProps = {
@@ -31,7 +33,7 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
 
   const selectableBooks = data?.filter(
     (book: Book) =>
-      !books.find((inventoryBook) => inventoryBook.book.id === book.id)
+      !books.find((inventoryBook) => inventoryBook.book.id === book.id),
   );
 
   return (
@@ -40,14 +42,14 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
         value={search}
         onChangeText={setSearch}
         leftIcon={Search}
-        className="h-12 border-gray-500 rounded-md px-3 data-[focus=true]:border-teal-600"
+        className="h-12 rounded-md border-gray-500 px-3 data-[focus=true]:border-teal-600"
         placeholder="Buscar pelo título ou identificador"
       />
 
       {/* Dropdown */}
       {!!search &&
         (!isLoading && selectableBooks && selectableBooks.length > 0 ? (
-          <View className="absolute top-[70px] left-0 right-0 bg-white border border-gray-500 rounded-lg z-10 elevation-lg">
+          <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 rounded-lg border border-gray-500 bg-white">
             <ScrollView
               className="max-h-[200px]"
               keyboardShouldPersistTaps="handled"
@@ -56,9 +58,9 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
                 <Pressable
                   key={book.id}
                   onPress={() => handleSelectBook(book)}
-                  className="p-3 border-b-1 border-gray-200 flex-row items-center"
+                  className="border-b-1 flex-row items-center border-gray-200 p-3"
                 >
-                  <Badge className="bg-slate-100 items-center justify-center rounded-sm w-18 mr-2">
+                  <Badge className="w-18 mr-2 items-center justify-center rounded-sm bg-slate-100">
                     <BadgeText className="font-bold">
                       {book.identifier}
                     </BadgeText>
@@ -69,12 +71,12 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
             </ScrollView>
           </View>
         ) : !isLoading && selectableBooks && selectableBooks.length === 0 ? (
-          <View className="absolute top-[70px] left-0 right-0 bg-white border border-gray-500 rounded-lg z-10 elevation-lg h-[50px] items-center justify-center">
+          <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 h-[50px] items-center justify-center rounded-lg border border-gray-500 bg-white">
             <Text className="text-gray-600">Nenhum livro encontrado...</Text>
           </View>
         ) : (
           isLoading && (
-            <View className="absolute top-[70px] left-0 right-0 bg-white border border-gray-500 rounded-lg z-10 elevation-lg h-[50px] items-center justify-center">
+            <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 h-[50px] items-center justify-center rounded-lg border border-gray-500 bg-white">
               <Spinner />
             </View>
           )

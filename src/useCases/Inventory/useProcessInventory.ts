@@ -1,7 +1,8 @@
-import { useToast } from "@/src/hooks/useToast";
-import { api } from "@/src/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+
+import { useToast } from "@/src/hooks/useToast";
+import { api } from "@/src/lib/api";
 
 export function useProcessInventory() {
   const queryClient = useQueryClient();

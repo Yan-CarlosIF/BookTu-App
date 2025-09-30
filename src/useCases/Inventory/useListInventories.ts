@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Inventory } from "../../shared/types/inventory";
+
 import { api } from "../../lib/api";
+import { Inventory } from "../../shared/types/inventory";
 
 interface IResponse {
   data: Inventory[];
