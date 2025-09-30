@@ -5,12 +5,7 @@ import { formatPrice } from "../utils/formatPrice";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { StockItem } from "../shared/types/stockItem";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { TapGesture } from "./TapGesture";
 
 type BookCardProps = {
   isBook?: boolean;
@@ -27,19 +22,6 @@ export function BookCard({
   isBook = false,
   quantity,
 }: BookCardProps) {
-  const scale = useSharedValue(1);
-
-  const tapGesture = Gesture.Tap().onStart(() => {
-    "worklet";
-    scale.value = withTiming(0.95, { duration: 100 }, () => {
-      scale.value = withTiming(1, { duration: 100 });
-    });
-  });
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
   function renderCategories() {
     const hasCategories = isBook && book.categories.length > 0;
 
@@ -84,61 +66,59 @@ export function BookCard({
   }
 
   return (
-    <GestureDetector gesture={tapGesture}>
-      <Animated.View collapsable={false} style={animatedStyle}>
-        <Pressable
-          onPress={onPress}
-          className="h-fit mb-6"
-          style={{
-            borderWidth: 1,
-            borderColor: "#D9D9D9",
-            borderRadius: 16,
-            padding: 16,
-            flexDirection: "row",
-            backgroundColor: "white",
-            overflow: "hidden",
-          }}
-        >
-          <View className="bg-teal-50 rounded-xl w-20 h-28 items-center justify-center mr-4 overflow-hidden">
-            <BookOpen size={28} color="#0d9488" />
-          </View>
+    <TapGesture>
+      <Pressable
+        onPress={onPress}
+        className="h-fit mb-6"
+        style={{
+          borderWidth: 1,
+          borderColor: "#D9D9D9",
+          borderRadius: 16,
+          padding: 16,
+          flexDirection: "row",
+          backgroundColor: "white",
+          overflow: "hidden",
+        }}
+      >
+        <View className="bg-teal-50 rounded-xl w-20 h-28 items-center justify-center mr-4 overflow-hidden">
+          <BookOpen size={28} color="#0d9488" />
+        </View>
 
-          <VStack className="flex-1 bg-transparent justify-between">
-            <VStack className="bg-transparent">
-              <HStack className="items-center mb-1">
-                <Text
-                  className="text-base font-bold text-gray-800"
-                  numberOfLines={2}
-                >
-                  {book.title} •
-                </Text>
-
-                <Text className="text-gray-600 text-sm" numberOfLines={1}>
-                  {" "}
-                  {book.author}
-                </Text>
-              </HStack>
-
-              <Text className="text-teal-700 font-poppins-semibold text-xl w-fit">
-                {book.identifier}
+        <VStack className="flex-1 bg-transparent justify-between">
+          <VStack className="bg-transparent">
+            <HStack className="items-center mb-1">
+              <Text
+                className="text-base font-bold text-gray-800"
+                numberOfLines={2}
+              >
+                {book.title} •
               </Text>
-            </VStack>
 
-            {isBook && (
-              <HStack className="flex-row items-center mb-2">
-                <Text className="text-teal-600 font-bold text-base">
-                  {formatPrice(book.price)}
-                </Text>
-                <Text className="text-gray-600 text-sm ml-1">
-                  • {book.release_year}
-                </Text>
-              </HStack>
-            )}
+              <Text className="text-gray-600 text-sm" numberOfLines={1}>
+                {" "}
+                {book.author}
+              </Text>
+            </HStack>
 
-            {isBook ? renderCategories() : renderQuantityAndEstablishment()}
+            <Text className="text-teal-700 font-poppins-semibold text-xl w-fit">
+              {book.identifier}
+            </Text>
           </VStack>
-        </Pressable>
-      </Animated.View>
-    </GestureDetector>
+
+          {isBook && (
+            <HStack className="flex-row items-center mb-2">
+              <Text className="text-teal-600 font-bold text-base">
+                {formatPrice(book.price)}
+              </Text>
+              <Text className="text-gray-600 text-sm ml-1">
+                • {book.release_year}
+              </Text>
+            </HStack>
+          )}
+
+          {isBook ? renderCategories() : renderQuantityAndEstablishment()}
+        </VStack>
+      </Pressable>
+    </TapGesture>
   );
 }

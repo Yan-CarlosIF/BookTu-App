@@ -6,15 +6,14 @@ import { Button } from "@components/Button";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useAuth } from "../hooks/useAuth";
-import { HistoryCard } from "../components/HistoryCard";
 import { Icon } from "@/components/ui/icon";
 import { useState } from "react";
 import {
   InventoryHistory,
   storageGetInventoryHistory,
 } from "../storage/StorageInventoryHistory";
-import { formatDate } from "../utils/formatDate";
 import { Inventory } from "../shared/types/inventory";
+import HistoryCard from "@components/HistoryCard";
 
 export function Home() {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
@@ -40,7 +39,7 @@ export function Home() {
   });
 
   return (
-    <VStack className="flex-1">
+    <VStack className="flex-1 bg-white">
       <HStack className="items-center rounded-b-xl justify-between px-8 bg-[#2BADA1] h-[68px] w-full">
         <Text className="text-white text-2xl font-poppins-bold">BookTu</Text>
         <TouchableOpacity onPress={handleSignOut} activeOpacity={0.7}>
@@ -86,10 +85,7 @@ export function Home() {
           renderItem={({ item: inventory }) => (
             <HistoryCard
               onPress={() => handleNavigateToInventory(inventory)}
-              processed={inventory.status === "processed"}
-              establishmentName={inventory.establishment.name}
-              date={formatDate(inventory.date)}
-              inventoryName={`Inventário - ${inventory.identifier}`}
+              item={inventory}
             />
           )}
           ListEmptyComponent={() => (
