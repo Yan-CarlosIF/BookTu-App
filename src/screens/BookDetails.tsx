@@ -4,7 +4,6 @@ import { FlatList, ScrollView, Text, View } from "react-native";
 import { Grid, GridItem } from "@/components/ui/grid";
 import { HStack } from "@/components/ui/hstack";
 import {
-  Book,
   CalendarDays,
   DollarSign,
   Fingerprint,
@@ -21,9 +20,9 @@ export function BookDetails() {
 
   const { bookId } = params as { bookId: string };
 
-  const { data: book, isFetching } = useGetBook(bookId);
+  const { data: book, isPending } = useGetBook(bookId);
 
-  if (isFetching) return <Loading />;
+  if (isPending) return <Loading />;
 
   return (
     <ScrollView>
