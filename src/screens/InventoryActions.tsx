@@ -2,7 +2,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Header } from "@components/Header";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Inventory } from "../shared/types/inventory";
-import { Alert, FlatList, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { Select } from "@components/Select";
 import { useEffect, useState } from "react";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
@@ -30,6 +30,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { InventoryBook } from "../shared/types/inventoryBook";
 import { api } from "../lib/api";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 type RouteParams = {
   inventoryId?: string;
@@ -160,6 +161,12 @@ export function InventoryActions() {
     goBack();
   }
 
+  function handleDeleteBook(bookId: string) {
+    setInventoryBooks((prev) =>
+      prev.filter((inventoryBook) => inventoryBook.book.id !== bookId)
+    );
+  }
+
   useEffect(() => {
     if (!inventoryId) return;
 
@@ -208,7 +215,8 @@ export function InventoryActions() {
             <Spinner size="large" />
           </View>
         ) : (
-          <FlatList
+          <Animated.FlatList
+            itemLayoutAnimation={LinearTransition.springify(500)}
             className="mt-6"
             showsVerticalScrollIndicator={false}
             data={inventoryBooks}
@@ -217,14 +225,7 @@ export function InventoryActions() {
             renderItem={({ item: inventoryBook }) => (
               <>
                 <SwipeToDelete
-                  onDelete={() => {
-                    setInventoryBooks(
-                      inventoryBooks.filter(
-                        (b) => b.book.id !== inventoryBook.book.id
-                      )
-                    );
-                    return true;
-                  }}
+                  onDelete={() => handleDeleteBook(inventoryBook.book.id)}
                 >
                   <BookCard
                     onPress={() => setEditingBookId(inventoryBook.id)}

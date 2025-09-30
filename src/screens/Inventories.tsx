@@ -7,12 +7,13 @@ import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import { useListInventories } from "@useCases/Inventory/useListInventories";
 import { useDebounce } from "../hooks/useDebounce";
 import { Select } from "@components/Select";
-import { FlatList, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { InventoryCard } from "../components/InventoryCard";
 import { Spinner } from "@/components/ui/spinner";
 import { Fab, FabIcon } from "@/components/ui/fab";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 export function Inventories() {
   const { data: establishmentsData, isPending: isPendingEstablishments } =
@@ -75,7 +76,8 @@ export function Inventories() {
             <Spinner size="large" />
           </View>
         ) : (
-          <FlatList
+          <Animated.FlatList
+            itemLayoutAnimation={LinearTransition.springify(500)}
             showsVerticalScrollIndicator={false}
             className="mt-12"
             data={inventories}
