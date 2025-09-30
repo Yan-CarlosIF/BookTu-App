@@ -25,7 +25,7 @@ import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistor
 export default function InventoryDetailScreen() {
   const { params } = useRoute();
   const { inventory } = params as { inventory: Inventory };
-  const [isProcessed, setIsProcessed] = useState(inventory.status);
+  const [processedStatus, setProcessedStatus] = useState(inventory.status);
 
   const {
     data,
@@ -45,7 +45,7 @@ export default function InventoryDetailScreen() {
 
   const handleProcessInventory = async () => {
     await processInventory(inventory.id);
-    setIsProcessed("processed");
+    setProcessedStatus("processed");
     await storageUpdateInventoryHistory({
       ...inventory,
       status: "processed",
@@ -85,7 +85,7 @@ export default function InventoryDetailScreen() {
     (async () =>
       await storageUpdateInventoryHistory({
         ...inventory,
-        status: isProcessed,
+        status: processedStatus,
       }))();
   }, []);
 
@@ -110,19 +110,19 @@ export default function InventoryDetailScreen() {
 
             <View
               className={`px-3 py-1 rounded-full border ${getStatusColor(
-                isProcessed
+                processedStatus
               )}`}
             >
               <View className="flex-row items-center">
-                {getStatusIcon(isProcessed)}
+                {getStatusIcon(processedStatus)}
                 <Text
                   className={`text-xs font-medium ${
-                    isProcessed === "unprocessed"
+                    processedStatus === "unprocessed"
                       ? "text-amber-600"
                       : "text-teal-700"
                   } ml-1`}
                 >
-                  {getStatusText(isProcessed)}
+                  {getStatusText(processedStatus)}
                 </Text>
               </View>
             </View>
@@ -209,7 +209,7 @@ export default function InventoryDetailScreen() {
           />
         )}
 
-        {(isProcessed === "unprocessed" || isProcessing) && (
+        {(processedStatus === "unprocessed" || isProcessing) && (
           <Button
             disabled={isProcessing}
             isLoading={isProcessing}

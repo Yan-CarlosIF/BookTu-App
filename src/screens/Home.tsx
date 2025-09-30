@@ -3,12 +3,12 @@ import { TouchableOpacity, Text, FlatList } from "react-native";
 import { HStack } from "@/components/ui/hstack";
 import { Book, Box, ClipboardList, LogOut } from "lucide-react-native";
 import { Button } from "@components/Button";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { useAuth } from "../hooks/useAuth";
 import { HistoryCard } from "../components/HistoryCard";
 import { Icon } from "@/components/ui/icon";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   InventoryHistory,
   storageGetInventoryHistory,
@@ -35,9 +35,9 @@ export function Home() {
 
   const handleSignOut = async () => await signOut();
 
-  useEffect(() => {
+  useFocusEffect(() => {
     getInventoryHistory();
-  }, []);
+  });
 
   return (
     <VStack className="flex-1">
