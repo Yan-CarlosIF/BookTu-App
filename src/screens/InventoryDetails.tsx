@@ -34,6 +34,7 @@ export default function InventoryDetailScreen() {
     isRefetching,
     refetch,
     isFetchingNextPage,
+    isPending,
   } = useListInventoryBooks(inventory.id);
 
   const { mutateAsync: processInventory, isPending: isProcessing } =
@@ -177,30 +178,36 @@ export default function InventoryDetailScreen() {
           <Text className="text-teal-600 font-medium">{totalItems} itens</Text>
         </HStack>
 
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
-          data={books}
-          keyExtractor={(item) => item.id}
-          refreshing={isRefetching}
-          onRefresh={refetch}
-          onEndReached={() => hasNextPage && fetchNextPage()}
-          onEndReachedThreshold={0.5}
-          ListEmptyComponent={() => (
-            <Text className="text-gray-600 text-2xl font-poppins text-center">
-              Inventário vazio...
-            </Text>
-          )}
-          ListFooterComponent={
-            isFetchingNextPage ? <Spinner size="large" /> : null
-          }
-          renderItem={({ item: inventoryBook }) => (
-            <BookCard
-              quantity={inventoryBook.quantity}
-              book={inventoryBook.book}
-            />
-          )}
-        />
+        {isPending ? (
+          <View className="flex-1 items-center justify-center">
+            <Spinner size="large" />
+          </View>
+        ) : (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            data={books}
+            keyExtractor={(item) => item.id}
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            onEndReached={() => hasNextPage && fetchNextPage()}
+            onEndReachedThreshold={0.5}
+            ListEmptyComponent={() => (
+              <Text className="text-gray-600 text-2xl font-poppins text-center">
+                Inventário vazio...
+              </Text>
+            )}
+            ListFooterComponent={
+              isFetchingNextPage ? <Spinner size="large" /> : null
+            }
+            renderItem={({ item: inventoryBook }) => (
+              <BookCard
+                quantity={inventoryBook.quantity}
+                book={inventoryBook.book}
+              />
+            )}
+          />
+        )}
 
         {(isProcessed === "unprocessed" || isProcessing) && (
           <Button
