@@ -1,8 +1,21 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { AxiosError } from "axios";
+
+import { Inventory } from "@/src/shared/types/inventory";
 
 import { useToast } from "../../hooks/useToast";
 import { api } from "../../lib/api";
+
+type InventoriesResponse = {
+  data: Inventory[];
+  total: number;
+  page: number;
+  lastPage: number;
+};
 
 export function useDeleteInventory() {
   const queryClient = useQueryClient();
@@ -15,8 +28,21 @@ export function useDeleteInventory() {
       return response;
     },
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inventories"] });
+    onSuccess: (_, id) => {
+      queryClient.setQueriesData<InfiniteData<InventoriesResponse>>(
+        { queryKey: ["inventories"], exact: false }, // pega todos os caches que começam com "inventories"
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((inventory) => inventory.id !== id),
+            })),
+          };
+        },
+      );
 
       toast.show({
         message: "Inventário excluído com sucesso",

@@ -11,13 +11,6 @@ export const api = axios.create({
 }) as APIInstanceProps;
 
 api.registerInterceptTokenManager = (signOut) => {
-  // Delay for 2 seconds
-  const requestInterceptorId = api.interceptors.request.use(async (config) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    return config;
-  });
-
   const responseInterceptorId = api.interceptors.response.use(
     (config) => config,
     (error: AxiosError) => {
@@ -26,12 +19,9 @@ api.registerInterceptTokenManager = (signOut) => {
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 
   // Return a function to eject the interceptor
-  return () => {
-    api.interceptors.request.eject(requestInterceptorId);
-    api.interceptors.response.eject(responseInterceptorId);
-  };
+  return () => api.interceptors.response.eject(responseInterceptorId);
 };
