@@ -5,14 +5,17 @@ import { Select } from "@components/Select";
 import { useNavigation } from "@react-navigation/native";
 import { useListBooks } from "@useCases/Book/useListBooks";
 import { Search } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
 import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
 import { useDebounce } from "../hooks/useDebounce";
+import { useNetInfo } from "../hooks/useNetInfo";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { Book } from "../shared/types/book";
+import { storageGetBooks } from "../storage/StorageBooksAndEstablishments";
 
 const BOOK_FILTERS = [
   { label: "A-Z", value: "asc" },
@@ -26,13 +29,16 @@ const BOOK_FILTERS = [
 type Filters = (typeof BOOK_FILTERS)[number]["value"];
 
 export function Books() {
+  const { isConnected } = useNetInfo();
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
+
   const [selectedFilter, setSelectedFilter] = useState<Filters | undefined>(
     undefined,
   );
+  const [offlineBooks, setOfflineBooks] = useState<Book[]>([]);
 
   const {
     data,
@@ -44,7 +50,13 @@ export function Books() {
     isPending,
   } = useListBooks(selectedFilter, debouncedSearch);
 
-  const books = data?.pages.flatMap((page) => page.books) ?? [];
+  const onlineBooks = data?.pages.flatMap((page) => page.books) ?? [];
+
+  useEffect(() => {
+    if (!isConnected) {
+      storageGetBooks().then(setOfflineBooks);
+    }
+  }, [isConnected]);
 
   return (
     <VStack className="flex-1">
@@ -58,6 +70,7 @@ export function Books() {
           placeholder="Buscar pelo título, autor ou identificador"
           rightIcon={
             <Select
+              isDisabled={!isConnected}
               options={BOOK_FILTERS}
               selectedFilter={selectedFilter}
               setSelectedFilter={setSelectedFilter}
@@ -65,7 +78,7 @@ export function Books() {
           }
         />
 
-        {isPending ? (
+        {isPending && isConnected ? (
           <View className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </View>
@@ -73,7 +86,7 @@ export function Books() {
           <FlatList
             showsVerticalScrollIndicator={false}
             className="mt-12 flex-1"
-            data={books}
+            data={isConnected ? onlineBooks : offlineBooks}
             keyExtractor={({ id }) => id}
             renderItem={({ item: book }) => (
               <BookCard
@@ -82,7 +95,7 @@ export function Books() {
                 book={book}
               />
             )}
-            onEndReached={() => hasNextPage && fetchNextPage()}
+            onEndReached={() => isConnected && hasNextPage && fetchNextPage()}
             onEndReachedThreshold={0.5}
             refreshing={isRefetching}
             onRefresh={refetch}

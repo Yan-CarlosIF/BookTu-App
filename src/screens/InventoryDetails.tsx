@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Building2,
   CheckCircle,
+  CloudOff,
   Fingerprint,
   MapPin,
   Package,
@@ -21,10 +22,12 @@ import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
+import { useNetInfo } from "../hooks/useNetInfo";
 import { Inventory } from "../shared/types/inventory";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 export function InventoryDetailScreen() {
+  const { isConnected } = useNetInfo();
   const { params } = useRoute();
   const { inventory } = params as { inventory: Inventory };
   const [processedStatus, setProcessedStatus] = useState(inventory.status);
@@ -180,7 +183,14 @@ export function InventoryDetailScreen() {
           <Text className="font-medium text-teal-600">{totalItems} itens</Text>
         </HStack>
 
-        {isPending ? (
+        {!isConnected ? (
+          <View className="flex-1 items-center justify-center">
+            <Icon as={CloudOff} className="text-teal-700" size={48} />
+            <Text className="mt-2 text-lg text-gray-800">
+              Sem conexão com a internet
+            </Text>
+          </View>
+        ) : isPending ? (
           <View className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </View>
@@ -195,7 +205,7 @@ export function InventoryDetailScreen() {
             onEndReached={() => hasNextPage && fetchNextPage()}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => (
-              <Text className="text-center font-poppins text-2xl text-gray-600">
+              <Text className="mt-4 text-center font-poppins text-2xl text-gray-600">
                 Inventário vazio...
               </Text>
             )}
@@ -211,7 +221,7 @@ export function InventoryDetailScreen() {
           />
         )}
 
-        {(processedStatus === "unprocessed" || isProcessing) && (
+        {(processedStatus === "unprocessed" || isProcessing) && isConnected && (
           <Button
             disabled={isProcessing}
             isLoading={isProcessing}

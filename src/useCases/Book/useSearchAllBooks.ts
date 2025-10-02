@@ -1,9 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useNetInfo } from "@/src/hooks/useNetInfo";
+
 import { api } from "../../lib/api";
 import { Book } from "../../shared/types/book";
 
-export function useGetAllBooks(search: string) {
+export function useSearchAllBooks(search: string) {
+  const { isConnected } = useNetInfo();
+
+  const hasConnectionWithInternet = isConnected ?? false;
+
+  const isEnabled = !!search && hasConnectionWithInternet;
+
   return useQuery({
     queryKey: ["books", search],
     queryFn: async () => {
@@ -13,6 +21,6 @@ export function useGetAllBooks(search: string) {
 
       return data;
     },
-    enabled: !!search,
+    enabled: isEnabled,
   });
 }

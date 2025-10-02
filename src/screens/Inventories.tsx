@@ -15,9 +15,11 @@ import { VStack } from "@/components/ui/vstack";
 
 import { InventoryCard } from "../components/InventoryCard";
 import { useDebounce } from "../hooks/useDebounce";
+import { useNetInfo } from "../hooks/useNetInfo";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 
 export function Inventories() {
+  const { isConnected } = useNetInfo();
   const { data: establishmentsData, isPending: isPendingEstablishments } =
     useGetAllEstablishments();
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
@@ -68,7 +70,7 @@ export function Inventories() {
           placeholder="Buscar pelo título, autor ou identificador"
           rightIcon={
             <Select
-              isDisabled={isPendingEstablishments}
+              isDisabled={isPendingEstablishments || !isConnected}
               options={establishments}
               selectedFilter={selectedFilter}
               setSelectedFilter={setSelectedFilter}
@@ -76,7 +78,7 @@ export function Inventories() {
           }
         />
 
-        {isPending ? (
+        {isPending && isConnected ? (
           <View className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </View>

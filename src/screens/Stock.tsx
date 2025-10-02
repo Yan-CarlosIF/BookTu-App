@@ -13,8 +13,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
 import { useDebounce } from "../hooks/useDebounce";
+import { useNetInfo } from "../hooks/useNetInfo";
 
 export function Stock() {
+  const { isConnected } = useNetInfo();
   const { data: establishmentsData, isPending: isPendingEstablishments } =
     useGetAllEstablishments();
 
@@ -65,7 +67,7 @@ export function Stock() {
           placeholder="Buscar pelo título do livro"
           rightIcon={
             <Select
-              isDisabled={isPendingEstablishments}
+              isDisabled={isPendingEstablishments || !isConnected}
               options={establishments}
               selectedFilter={selectedFilter}
               setSelectedFilter={setSelectedFilter}
@@ -74,7 +76,7 @@ export function Stock() {
         />
 
         <Text className="mt-8 flex items-center font-poppins-medium text-lg text-gray-800">
-          {isPending ? (
+          {isPending && isConnected ? (
             <Skeleton speed={2} className="h-4 w-6 rounded-sm" />
           ) : (
             <Text>{totalItems}</Text>
@@ -82,7 +84,7 @@ export function Stock() {
           Itens
         </Text>
 
-        {isPending ? (
+        {isPending && isConnected ? (
           <VStack className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </VStack>
@@ -100,7 +102,7 @@ export function Stock() {
             refreshing={isRefetching}
             onRefresh={refetch}
             ListEmptyComponent={() => (
-              <Text className="text-center font-poppins text-2xl text-gray-600">
+              <Text className="mt-4 text-center font-poppins text-2xl text-gray-600">
                 Nenhum livro encontrado...
               </Text>
             )}

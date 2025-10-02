@@ -1,24 +1,30 @@
 import { Input } from "@components/Input";
-import { useGetAllBooks } from "@useCases/Book/useGetAllBooks";
 import { Search } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
+import { useSearchAllBooks } from "@/src/useCases/Book/useSearchAllBooks";
 
+import { useNetInfo } from "../hooks/useNetInfo";
 import { Book } from "../shared/types/book";
 import { InventoryBook } from "../shared/types/inventoryBook";
+import { storageGetBooks } from "../storage/StorageBooksAndEstablishments";
 
 type BookSelectorProps = {
-  books: InventoryBook[];
+  inventoryBooks: InventoryBook[];
   setBooks: React.Dispatch<React.SetStateAction<InventoryBook[]>>;
 };
 
-export function BookSelector({ books, setBooks }: BookSelectorProps) {
+export function BookSelector({ inventoryBooks, setBooks }: BookSelectorProps) {
+  const { isConnected } = useNetInfo();
+
   const [search, setSearch] = useState("");
 
-  const { data, isLoading } = useGetAllBooks(search);
+  const [offlineBooks, setOfflineBooks] = useState<Book[]>([]);
+
+  const { data, isLoading } = useSearchAllBooks(search);
 
   function handleSelectBook(book: Book) {
     const inventoryItem = {
@@ -31,10 +37,25 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
     setSearch("");
   }
 
-  const selectableBooks = data?.filter(
+  const books = isConnected ? data : offlineBooks;
+
+  const selectableBooks = books?.filter(
     (book: Book) =>
-      !books.find((inventoryBook) => inventoryBook.book.id === book.id),
+      !inventoryBooks.find(
+        (inventoryBook) => inventoryBook.book.id === book.id,
+      ),
   );
+
+  useEffect(() => {
+    if (isConnected) return;
+
+    (async () => {
+      const cachedBooks = await storageGetBooks(search);
+      setOfflineBooks(cachedBooks);
+    })();
+  }, [isConnected, search]);
+
+  const hasBooksToSelect = selectableBooks && selectableBooks.length > 0;
 
   return (
     <View style={{ position: "relative" }}>
@@ -48,7 +69,7 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
 
       {/* Dropdown */}
       {!!search &&
-        (!isLoading && selectableBooks && selectableBooks.length > 0 ? (
+        (hasBooksToSelect ? (
           <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 rounded-lg border border-gray-500 bg-white">
             <ScrollView
               className="max-h-[200px]"
@@ -75,6 +96,7 @@ export function BookSelector({ books, setBooks }: BookSelectorProps) {
             <Text className="text-gray-600">Nenhum livro encontrado...</Text>
           </View>
         ) : (
+          isConnected &&
           isLoading && (
             <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 h-[50px] items-center justify-center rounded-lg border border-gray-500 bg-white">
               <Spinner />

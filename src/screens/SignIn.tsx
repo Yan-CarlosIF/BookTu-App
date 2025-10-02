@@ -1,7 +1,7 @@
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
+import { CloudOff, Eye, EyeOff, Lock, UserRound } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -13,10 +13,12 @@ import {
 } from "react-native";
 import { z } from "zod";
 
+import { Alert, AlertIcon, AlertText } from "@/components/ui/alert";
 import { InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 
 import { useAuth } from "../hooks/useAuth";
+import { useNetInfo } from "../hooks/useNetInfo";
 import { useToast } from "../hooks/useToast";
 
 const signInFormSchema = z.object({
@@ -41,6 +43,8 @@ export function SignIn() {
 
   const toast = useToast();
   const { signIn, isLoading } = useAuth();
+  const { isConnected } = useNetInfo();
+
   const [hidePassword, setHidePassword] = useState(true);
 
   async function handleSignIn({ login, password }: SignInFormData) {
@@ -77,6 +81,7 @@ export function SignIn() {
               control={control}
               render={({ field: { onChange, value } }) => (
                 <Input
+                  isDisabled={!isConnected}
                   leftIcon={UserRound}
                   value={value}
                   onChangeText={onChange}
@@ -92,6 +97,7 @@ export function SignIn() {
               control={control}
               render={({ field: { onChange, value } }) => (
                 <Input
+                  isDisabled={!isConnected}
                   leftIcon={Lock}
                   value={value}
                   onChangeText={onChange}
@@ -112,6 +118,7 @@ export function SignIn() {
               )}
             />
             <Button
+              isDisabled={!isConnected}
               isLoading={isLoading}
               onPress={handleSubmit(handleSignIn)}
               className="mt-16 h-14 bg-teal-700 data-[active=true]:bg-teal-600"
@@ -120,6 +127,18 @@ export function SignIn() {
                 Iniciar sessão
               </Text>
             </Button>
+            {!isConnected && (
+              <Alert
+                className="rounded-md px-6 py-4"
+                action="error"
+                variant="solid"
+              >
+                <AlertIcon as={CloudOff} />
+                <AlertText className="ml-auto">
+                  Necessário conexão com a internet
+                </AlertText>
+              </Alert>
+            )}
           </VStack>
         </VStack>
       </TouchableWithoutFeedback>

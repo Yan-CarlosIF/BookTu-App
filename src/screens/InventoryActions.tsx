@@ -12,6 +12,9 @@ import {
   BrushCleaning,
   Check,
   ChevronDown,
+  ChevronLeft,
+  CloudAlert,
+  CloudOff,
   MenuIcon,
   Plus,
 } from "lucide-react-native";
@@ -19,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
+import { Alert as AlertUI, AlertIcon, AlertText } from "@/components/ui/alert";
 import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
@@ -27,11 +31,14 @@ import { SelectInput } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
+import { Button } from "../components/Button";
+import { useNetInfo } from "../hooks/useNetInfo";
 import { api } from "../lib/api";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Book } from "../shared/types/book";
 import { Inventory } from "../shared/types/inventory";
 import { InventoryBook } from "../shared/types/inventoryBook";
+import { storageGetEstablishments } from "../storage/StorageBooksAndEstablishments";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 type RouteParams = {
@@ -47,11 +54,20 @@ export type InventoryItem = Book & {
   quantity: number;
 };
 
+type EstablishmentFilterItem = {
+  label: string;
+  value: string;
+};
+
 export function InventoryActions() {
+  const { isConnected } = useNetInfo();
   const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
 
   const [loading, setLoading] = useState(false);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
+  const [offlineEstablishments, setOfflineEstablishments] = useState<
+    EstablishmentFilterItem[]
+  >([]);
 
   const {
     params: { inventoryId, inventory },
@@ -62,21 +78,18 @@ export function InventoryActions() {
 
   let initialEstablishment = inventory?.establishment_id ?? undefined;
 
-  const establishments = establishmentsData?.reduce(
-    (obj, establishment) => {
-      obj.push({
-        label: establishment.name,
-        value: establishment.id,
-      });
+  const establishments = establishmentsData?.reduce((obj, establishment) => {
+    obj.push({
+      label: establishment.name,
+      value: establishment.id,
+    });
 
-      if (inventory?.establishment_id === establishment.id) {
-        initialEstablishment = establishment.id;
-      }
+    if (inventory?.establishment_id === establishment.id) {
+      initialEstablishment = establishment.id;
+    }
 
-      return obj;
-    },
-    [] as { label: string; value: string }[],
-  );
+    return obj;
+  }, [] as EstablishmentFilterItem[]);
 
   const [selectedEstablishment, setSelectedEstablishment] = useState<
     string | undefined
@@ -189,6 +202,51 @@ export function InventoryActions() {
     })();
   }, [inventoryId]);
 
+  useEffect(() => {
+    if (isConnected) return;
+
+    (async () => {
+      try {
+        setLoading(true);
+        const establishments = await storageGetEstablishments(
+          initialEstablishment,
+          inventory?.establishment_id,
+        );
+
+        setOfflineEstablishments(establishments);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [isConnected, initialEstablishment, inventory?.establishment_id]);
+
+  if (!isConnected && offlineEstablishments.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white px-6">
+        <Icon as={CloudOff} className="text-teal-700" size={52} />
+        <AlertUI
+          variant="solid"
+          className="mx-6 mt-4 rounded-md bg-teal-300/20"
+        >
+          <AlertIcon as={CloudAlert} className="text-teal-700" />
+          <AlertText className="ml-1 text-sm text-teal-700">
+            Você não tem dados salvos no dispositivo para criar um inventário,
+            conecte-se a internet.
+          </AlertText>
+        </AlertUI>
+        <Button
+          onPress={goBack}
+          className="mt-4 bg-teal-700 data-[active=true]:bg-teal-600"
+        >
+          <Icon as={ChevronLeft} className="text-white" />
+          <Text className="text-white">Voltar</Text>
+        </Button>
+      </View>
+    );
+  }
+
   return (
     <VStack className="flex-1 bg-white">
       <Header
@@ -201,14 +259,17 @@ export function InventoryActions() {
       />
       <VStack className="mt-7 flex-1 px-6">
         <Select
-          options={establishments ?? []}
+          options={isConnected ? (establishments ?? []) : offlineEstablishments}
           selectedFilter={selectedEstablishment}
           setSelectedFilter={setSelectedEstablishment}
           Icon={ChevronDown}
           Input={SelectInput}
         />
 
-        <BookSelector books={inventoryBooks} setBooks={setInventoryBooks} />
+        <BookSelector
+          inventoryBooks={inventoryBooks}
+          setBooks={setInventoryBooks}
+        />
 
         <HStack className="mt-8 items-center justify-between">
           <Text className="font-poppins-medium text-2xl">Produtos</Text>
