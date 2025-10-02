@@ -52,7 +52,7 @@ async function storageSetEstablishments(establishments: Establishment[]) {
   await AsyncStorage.setItem(ESTABLISHMENTS_STORAGE, data);
 }
 
-async function storageGetEstablishments(
+async function storageGetFilteredEstablishments(
   initialEstablishment: string | undefined,
   inventoryEstablishmentId?: string,
 ) {
@@ -81,11 +81,22 @@ async function storageGetEstablishments(
   return establishments;
 }
 
+async function storageGetEstablishment(id: string) {
+  const data = await AsyncStorage.getItem(ESTABLISHMENTS_STORAGE);
+
+  if (!data) return null;
+
+  const establishmentsData = JSON.parse(data) as Establishment[];
+
+  return establishmentsData.find((establishment) => establishment.id === id);
+}
+
 export {
   storageSetBooks,
   storageGetBooks,
   storageSetEstablishments,
-  storageGetEstablishments,
+  storageGetFilteredEstablishments,
   storageGetRefetchTimestamp,
+  storageGetEstablishment,
   storageSetRefetchTimestamp,
 };

@@ -17,6 +17,7 @@ import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
+import { useNetInfo } from "../hooks/useNetInfo";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Inventory } from "../shared/types/inventory";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
@@ -32,11 +33,14 @@ export function InventoryActionSheet({
   onClose,
   inventory,
 }: InventoryActionSheetProps) {
+  const { isConnected } = useNetInfo();
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
   const { mutateAsync: processInventory, isPending: isProcessing } =
     useProcessInventory();
 
   async function handleProcessInventory() {
+    if (!isConnected) return;
+
     await processInventory(inventory.id);
     await storageUpdateInventoryHistory(inventory);
     onClose();
@@ -70,14 +74,16 @@ export function InventoryActionSheet({
             {isProcessing ? (
               <Spinner size="large" />
             ) : (
-              <VStack>
-                <ActionsheetItemText className="font-poppins-semibold text-xl text-gray-800">
-                  Processar Inventário
-                </ActionsheetItemText>
-                <ActionsheetItemText className="text-sm text-gray-800">
-                  Transformar o estoque do estabelecimento
-                </ActionsheetItemText>
-              </VStack>
+              isConnected && (
+                <VStack>
+                  <ActionsheetItemText className="font-poppins-semibold text-xl text-gray-800">
+                    Processar Inventário
+                  </ActionsheetItemText>
+                  <ActionsheetItemText className="text-sm text-gray-800">
+                    Transformar o estoque do estabelecimento
+                  </ActionsheetItemText>
+                </VStack>
+              )
             )}
           </HStack>
         </ActionsheetItem>

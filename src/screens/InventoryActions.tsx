@@ -33,13 +33,15 @@ import { VStack } from "@/components/ui/vstack";
 
 import { Button } from "../components/Button";
 import { useNetInfo } from "../hooks/useNetInfo";
+import { useToast } from "../hooks/useToast";
 import { api } from "../lib/api";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Book } from "../shared/types/book";
 import { Inventory } from "../shared/types/inventory";
 import { InventoryBook } from "../shared/types/inventoryBook";
-import { storageGetEstablishments } from "../storage/StorageBooksAndEstablishments";
+import { storageGetFilteredEstablishments } from "../storage/StorageBooksAndEstablishments";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
+import { storageSetOfflineInventories } from "../storage/StorageOfflineInventories";
 
 type RouteParams = {
   inventoryId?: string;
@@ -60,10 +62,12 @@ type EstablishmentFilterItem = {
 };
 
 export function InventoryActions() {
+  const toast = useToast();
   const { isConnected } = useNetInfo();
   const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
 
   const [loading, setLoading] = useState(false);
+  const [isOfflineActionPending, setIsOfflineActionPending] = useState(false);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
   const [offlineEstablishments, setOfflineEstablishments] = useState<
     EstablishmentFilterItem[]
@@ -127,7 +131,9 @@ export function InventoryActions() {
   }
 
   async function handleCreateInventory() {
-    if (isCreateAction) {
+    if (!isCreateAction) return;
+
+    if (isConnected) {
       await createInventory({
         establishment_id: selectedEstablishment ?? "",
         total_quantity: total,
@@ -136,6 +142,39 @@ export function InventoryActions() {
           quantity: inventoryBook.quantity,
         })),
       });
+    } else {
+      await handleCreateOfflineInventory();
+      navigate("inventories");
+    }
+  }
+
+  async function handleCreateOfflineInventory() {
+    try {
+      setIsOfflineActionPending(true);
+
+      await storageSetOfflineInventories({
+        establishment_id: selectedEstablishment ?? "",
+        total_quantity: total,
+        books: inventoryBooks.map((inventoryBook) => ({
+          book_id: inventoryBook.book_id,
+          book: inventoryBook.book,
+          quantity: inventoryBook.quantity,
+        })),
+      });
+
+      toast.show({
+        message: "Inventário salvo offline com sucesso",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch {
+      toast.show({
+        message: "Erro ao salvar inventário offline",
+        variant: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsOfflineActionPending(false);
     }
   }
 
@@ -208,7 +247,7 @@ export function InventoryActions() {
     (async () => {
       try {
         setLoading(true);
-        const establishments = await storageGetEstablishments(
+        const establishments = await storageGetFilteredEstablishments(
           initialEstablishment,
           inventory?.establishment_id,
         );
@@ -312,12 +351,15 @@ export function InventoryActions() {
         <Fab
           onPress={isCreateAction ? handleCreateInventory : handleEditInventory}
           isDisabled={
-            !selectedEstablishment || isCreatePending || isEditPending
+            !selectedEstablishment ||
+            isCreatePending ||
+            isEditPending ||
+            isOfflineActionPending
           }
           placement="bottom center"
           className="w-32 rounded-md bg-teal-600 data-[active=true]:bg-teal-500"
         >
-          {isCreatePending || isEditPending ? (
+          {isCreatePending || isEditPending || isOfflineActionPending ? (
             <Spinner size="small" />
           ) : (
             <>

@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useListInventories } from "@useCases/Inventory/useListInventories";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import { Plus, Search } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
@@ -14,11 +14,19 @@ import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
 import { InventoryCard } from "../components/InventoryCard";
+import { OfflineInventoryCard } from "../components/OfflineInventoryCard";
 import { useDebounce } from "../hooks/useDebounce";
 import { useNetInfo } from "../hooks/useNetInfo";
+import { useToast } from "../hooks/useToast";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
+import { OfflineInventory } from "../shared/types/offlineInventory";
+import {
+  storageGetOfflineInventories,
+  storageRemoveOfflineInventory,
+} from "../storage/StorageOfflineInventories";
 
 export function Inventories() {
+  const toast = useToast();
   const { isConnected } = useNetInfo();
   const { data: establishmentsData, isPending: isPendingEstablishments } =
     useGetAllEstablishments();
@@ -29,6 +37,12 @@ export function Inventories() {
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>(
     undefined,
   );
+
+  const [isOfflineInventoriesPending, setIsOfflineInventoriesPending] =
+    useState(false);
+  const [offlineInventories, setOfflineInventories] = useState<
+    OfflineInventory[]
+  >([]);
 
   const {
     data,
@@ -58,6 +72,47 @@ export function Inventories() {
       ) ?? [];
   }
 
+  async function handleDeleteOfflineInventory(offlineInventoryId: string) {
+    try {
+      await storageRemoveOfflineInventory(offlineInventoryId);
+
+      setOfflineInventories((inventories) =>
+        inventories.filter(
+          (inventory) => inventory.temporary_id !== offlineInventoryId,
+        ),
+      );
+
+      toast.show({
+        message: "Inventário excluído com sucesso",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch {
+      toast.show({
+        message: "Não foi possível excluir o inventário offline",
+        variant: "error",
+        duration: 3000,
+      });
+    }
+  }
+
+  useEffect(() => {
+    try {
+      setIsOfflineInventoriesPending(true);
+
+      (async () => {
+        const inventories = await storageGetOfflineInventories();
+        setOfflineInventories(inventories);
+      })();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsOfflineInventoriesPending(false);
+    }
+  }, []);
+
+  const isLoading = isConnected ? isPending : isOfflineInventoriesPending;
+
   return (
     <VStack className="flex-1">
       <Header onPress={() => navigate("home")} title="Inventários" />
@@ -78,11 +133,11 @@ export function Inventories() {
           }
         />
 
-        {isPending && isConnected ? (
+        {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </View>
-        ) : (
+        ) : isConnected ? (
           <Animated.FlatList
             itemLayoutAnimation={LinearTransition.springify(500)}
             showsVerticalScrollIndicator={false}
@@ -105,6 +160,21 @@ export function Inventories() {
             ListFooterComponent={
               isFetchingNextPage ? <Spinner size="large" /> : null
             }
+          />
+        ) : (
+          <Animated.FlatList
+            className="mt-12"
+            showsVerticalScrollIndicator={false}
+            itemLayoutAnimation={LinearTransition.springify(500)}
+            data={offlineInventories}
+            keyExtractor={({ temporary_id }) => temporary_id}
+            contentContainerStyle={{ paddingBottom: 75 }}
+            renderItem={({ item: offlineInventory }) => (
+              <OfflineInventoryCard
+                onDelete={handleDeleteOfflineInventory}
+                offlineInventory={offlineInventory}
+              />
+            )}
           />
         )}
       </VStack>
