@@ -15,10 +15,13 @@ import {
 import { Button, ButtonText } from "@/components/ui/button";
 
 import { InventoryBook } from "../shared/types/inventoryBook";
+import { OfflineInventoryBook } from "../shared/types/offlineInventoryBook";
 
 type UpdateProductDialogProps = {
-  book: InventoryBook;
-  setBooks: React.Dispatch<React.SetStateAction<InventoryBook[]>>;
+  book: InventoryBook | OfflineInventoryBook;
+  setBooks: React.Dispatch<
+    React.SetStateAction<InventoryBook[] | OfflineInventoryBook[]>
+  >;
   isOpen: boolean;
   onClose: () => void;
 };
@@ -39,9 +42,8 @@ export function UpdateProductDialog({
   isOpen,
   onClose,
   book: {
-    id,
     quantity: defaultQuantity,
-    book: { title },
+    book: { title, id },
   },
 }: UpdateProductDialogProps) {
   const {
@@ -59,7 +61,7 @@ export function UpdateProductDialog({
   function handleUpdateQuantity({ productQuantity }: QuantityForm) {
     setBooks((prevBooks) =>
       prevBooks.map((book) => {
-        if (book.id === id) {
+        if (book.book_id === id) {
           return {
             ...book,
             quantity: Number(productQuantity),

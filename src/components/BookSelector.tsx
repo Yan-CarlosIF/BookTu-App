@@ -10,11 +10,14 @@ import { useSearchAllBooks } from "@/src/useCases/Book/useSearchAllBooks";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { Book } from "../shared/types/book";
 import { InventoryBook } from "../shared/types/inventoryBook";
+import { OfflineInventoryBook } from "../shared/types/offlineInventoryBook";
 import { storageGetBooks } from "../storage/StorageBooksAndEstablishments";
 
 type BookSelectorProps = {
-  inventoryBooks: InventoryBook[];
-  setBooks: React.Dispatch<React.SetStateAction<InventoryBook[]>>;
+  inventoryBooks: InventoryBook[] | OfflineInventoryBook[];
+  setBooks: React.Dispatch<
+    React.SetStateAction<InventoryBook[] | OfflineInventoryBook[]>
+  >;
 };
 
 export function BookSelector({ inventoryBooks, setBooks }: BookSelectorProps) {

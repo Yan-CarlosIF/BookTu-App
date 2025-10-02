@@ -32,6 +32,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
 import { Button } from "../components/Button";
+import { Loading } from "../components/Loading";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { useToast } from "../hooks/useToast";
 import { api } from "../lib/api";
@@ -39,13 +40,19 @@ import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Book } from "../shared/types/book";
 import { Inventory } from "../shared/types/inventory";
 import { InventoryBook } from "../shared/types/inventoryBook";
+import { OfflineInventory } from "../shared/types/offlineInventory";
+import { OfflineInventoryBook } from "../shared/types/offlineInventoryBook";
 import { storageGetFilteredEstablishments } from "../storage/StorageBooksAndEstablishments";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
-import { storageSetOfflineInventories } from "../storage/StorageOfflineInventories";
+import {
+  storageSetOfflineInventories,
+  storageUpdateOfflineInventories,
+} from "../storage/StorageOfflineInventories";
 
 type RouteParams = {
   inventoryId?: string;
   inventory?: Inventory;
+  offlineInventory?: OfflineInventory;
 };
 
 type IResponse = Inventory & {
@@ -74,13 +81,18 @@ export function InventoryActions() {
   >([]);
 
   const {
-    params: { inventoryId, inventory },
+    params: { inventoryId, inventory, offlineInventory },
   } = useRoute() as { params: RouteParams };
   const isCreateAction = !inventoryId && !inventory;
+  const isOfflineEditAction = !!offlineInventory?.temporary_id;
 
   const { data: establishmentsData } = useGetAllEstablishments();
 
   let initialEstablishment = inventory?.establishment_id ?? undefined;
+
+  if (offlineInventory) {
+    initialEstablishment = offlineInventory.establishment_id;
+  }
 
   const establishments = establishmentsData?.reduce((obj, establishment) => {
     obj.push({
@@ -99,7 +111,9 @@ export function InventoryActions() {
     string | undefined
   >(initialEstablishment);
 
-  const [inventoryBooks, setInventoryBooks] = useState<InventoryBook[]>([]);
+  const [inventoryBooks, setInventoryBooks] = useState<
+    InventoryBook[] | OfflineInventoryBook[]
+  >(offlineInventory?.books ?? []);
 
   const total = inventoryBooks.reduce((total, book) => {
     return total + book.quantity;
@@ -179,7 +193,9 @@ export function InventoryActions() {
   }
 
   async function handleEditInventory() {
-    if (inventory) {
+    if (isConnected) {
+      if (!inventory) return;
+
       await editInventory({
         id: inventory.id,
         establishment_id: selectedEstablishment ?? "",
@@ -190,7 +206,43 @@ export function InventoryActions() {
       });
 
       await storageUpdateInventoryHistory(inventory);
-      navigate("inventories");
+    } else {
+      await handleEditOfflineInventory();
+    }
+
+    navigate("inventories");
+  }
+
+  async function handleEditOfflineInventory() {
+    try {
+      setIsOfflineActionPending(true);
+
+      await storageUpdateOfflineInventories(
+        {
+          establishment_id: selectedEstablishment ?? "",
+          total_quantity: total,
+          books: inventoryBooks.map((inventoryBook) => ({
+            book_id: inventoryBook.book_id,
+            book: inventoryBook.book,
+            quantity: inventoryBook.quantity,
+          })),
+        },
+        offlineInventory?.temporary_id ?? "",
+      );
+
+      toast.show({
+        message: "Inventário offline editado com sucesso",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch {
+      toast.show({
+        message: "Erro ao editar inventário offline",
+        variant: "success",
+        duration: 3000,
+      });
+    } finally {
+      setIsOfflineActionPending(false);
     }
   }
 
@@ -225,7 +277,7 @@ export function InventoryActions() {
   }
 
   useEffect(() => {
-    if (!inventoryId) return;
+    if (!inventoryId || !isConnected) return;
 
     (async () => {
       try {
@@ -239,7 +291,7 @@ export function InventoryActions() {
         setLoading(false);
       }
     })();
-  }, [inventoryId]);
+  }, [inventoryId, isConnected]);
 
   useEffect(() => {
     if (isConnected) return;
@@ -260,6 +312,8 @@ export function InventoryActions() {
       }
     })();
   }, [isConnected, initialEstablishment, inventory?.establishment_id]);
+
+  if (loading) return <Loading />;
 
   if (!isConnected && offlineEstablishments.length === 0) {
     return (
@@ -291,9 +345,9 @@ export function InventoryActions() {
       <Header
         onPress={handleNavigate}
         title={
-          isCreateAction
+          isCreateAction && !isOfflineEditAction
             ? "Criar Inventário"
-            : `Editar Inventário ${inventory?.identifier}`
+            : `Editar Inventário ${inventory?.identifier ?? "offline"}`
         }
       />
       <VStack className="mt-7 flex-1 px-6">
@@ -333,7 +387,7 @@ export function InventoryActions() {
                   onDelete={() => handleDeleteBook(inventoryBook.book.id)}
                 >
                   <BookCard
-                    onPress={() => setEditingBookId(inventoryBook.id)}
+                    onPress={() => setEditingBookId(inventoryBook.book.id)}
                     quantity={inventoryBook.quantity}
                     book={inventoryBook.book}
                   />
@@ -341,7 +395,7 @@ export function InventoryActions() {
                 <UpdateProductDialog
                   setBooks={setInventoryBooks}
                   book={inventoryBook}
-                  isOpen={editingBookId === inventoryBook.id}
+                  isOpen={editingBookId === inventoryBook.book_id}
                   onClose={() => setEditingBookId(null)}
                 />
               </>
@@ -349,7 +403,11 @@ export function InventoryActions() {
           />
         )}
         <Fab
-          onPress={isCreateAction ? handleCreateInventory : handleEditInventory}
+          onPress={
+            isCreateAction && !isOfflineEditAction
+              ? handleCreateInventory
+              : handleEditInventory
+          }
           isDisabled={
             !selectedEstablishment ||
             isCreatePending ||
@@ -364,7 +422,9 @@ export function InventoryActions() {
           ) : (
             <>
               <FabLabel className="font-medium">
-                {isCreateAction ? "Adicionar" : "Salvar"}
+                {isCreateAction && !isOfflineEditAction
+                  ? "Adicionar"
+                  : "Salvar"}
               </FabLabel>
               <FabIcon as={isCreateAction ? Plus : Check} />
             </>

@@ -11,6 +11,7 @@ import { InventoryActions } from "../screens/InventoryActions";
 import { InventoryDetailScreen } from "../screens/InventoryDetails";
 import { Stock } from "../screens/Stock";
 import { Inventory } from "../shared/types/inventory";
+import { OfflineInventory } from "../shared/types/offlineInventory";
 
 type AppRoutesType = {
   home: undefined;
@@ -22,10 +23,12 @@ type AppRoutesType = {
   inventories: undefined;
   inventoryDetails: {
     inventory: Inventory;
+    offlineInventory?: OfflineInventory;
   };
   inventoryActions: {
     inventoryId?: string;
     inventory?: Inventory;
+    offlineInventory?: OfflineInventory;
   };
 };
 

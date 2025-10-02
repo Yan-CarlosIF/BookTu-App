@@ -50,7 +50,7 @@ export function OfflineInventoryCard({
   const scale = useSharedValue(1);
 
   const handleNavigate = () => {
-    navigate("inventoryActions", {});
+    navigate("inventoryActions", { offlineInventory });
   };
 
   const longPressGesture = Gesture.LongPress()

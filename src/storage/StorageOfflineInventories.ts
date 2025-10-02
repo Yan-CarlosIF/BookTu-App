@@ -25,6 +25,36 @@ async function storageGetOfflineInventories() {
   return inventories;
 }
 
+async function storageUpdateOfflineInventories(
+  data: CreateOfflineInventorySchema,
+  offlineInventoryId: string,
+) {
+  const inventories = await storageGetOfflineInventories();
+
+  const inventoryIndex = inventories.findIndex(
+    (inventory) => inventory.temporary_id === offlineInventoryId,
+  );
+
+  if (inventoryIndex === -1) throw new Error("Inventory not found");
+
+  if (inventories[inventoryIndex].establishment_id === data.establishment_id) {
+    inventories[inventoryIndex].books = data.books;
+    inventories[inventoryIndex].total_quantity = data.total_quantity;
+  } else {
+    const establishment = await storageGetEstablishment(data.establishment_id);
+
+    inventories[inventoryIndex].establishment = establishment;
+    inventories[inventoryIndex].establishment_id = data.establishment_id;
+    inventories[inventoryIndex].books = data.books;
+    inventories[inventoryIndex].total_quantity = data.total_quantity;
+  }
+
+  await AsyncStorage.setItem(
+    OFFLINE_INVENTORIES_STORAGE,
+    JSON.stringify(inventories),
+  );
+}
+
 async function storageSetOfflineInventories({
   books,
   establishment_id,
@@ -78,4 +108,5 @@ export {
   storageSetOfflineInventories,
   storageClearOfflineInventories,
   storageRemoveOfflineInventory,
+  storageUpdateOfflineInventories,
 };

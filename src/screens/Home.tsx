@@ -56,6 +56,8 @@ export function Home() {
 
         const dateOneHourLater = Date.now() + 1000 * 60 * 60;
         await storageSetRefetchTimestamp(dateOneHourLater);
+
+        console.log("✅ Dados salvos com sucesso");
       } else {
         console.log("✅ Usando cache, ainda não passou 1h");
       }
