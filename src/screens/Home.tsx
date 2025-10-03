@@ -75,7 +75,7 @@ export function Home() {
   }
 
   function handleNavigateToInventory(inventory: Inventory) {
-    navigate("inventoryDetails", { inventory: inventory });
+    navigate("inventoryDetails", { inventory: inventory, isOffline: false });
   }
 
   const { signOut } = useAuth();

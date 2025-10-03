@@ -8,7 +8,9 @@ import {
   AlertCircle,
   Building2,
   CheckCircle,
+  CloudDownload,
   CloudOff,
+  CloudUpload,
   Fingerprint,
   MapPin,
   Package,
@@ -24,13 +26,23 @@ import { VStack } from "@/components/ui/vstack";
 
 import { useNetInfo } from "../hooks/useNetInfo";
 import { Inventory } from "../shared/types/inventory";
+import { OfflineInventory } from "../shared/types/offlineInventory";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 export function InventoryDetailScreen() {
   const { isConnected } = useNetInfo();
   const { params } = useRoute();
-  const { inventory } = params as { inventory: Inventory };
-  const [processedStatus, setProcessedStatus] = useState(inventory.status);
+  const { inventory, isOffline } = params as {
+    inventory: Inventory | OfflineInventory;
+    isOffline: boolean;
+  };
+
+  const offlineInventory = inventory as OfflineInventory;
+  const actualInventory = inventory as Inventory;
+
+  const [processedStatus, setProcessedStatus] = useState(
+    actualInventory?.status,
+  );
 
   const {
     data,
@@ -40,21 +52,27 @@ export function InventoryDetailScreen() {
     refetch,
     isFetchingNextPage,
     isPending,
-  } = useListInventoryBooks(inventory.id);
+  } = useListInventoryBooks(actualInventory?.id);
 
   const { mutateAsync: processInventory, isPending: isProcessing } =
     useProcessInventory();
 
-  const books = data?.items ?? [];
-  const totalItems = data?.total;
+  const books = data?.items ?? offlineInventory?.books ?? [];
+  const totalItems = data?.total ?? offlineInventory?.books?.length ?? 0;
 
   const handleProcessInventory = async () => {
-    await processInventory(inventory.id);
+    if (isOffline) return;
+
+    await processInventory(actualInventory.id);
     setProcessedStatus("processed");
     await storageUpdateInventoryHistory({
-      ...inventory,
+      ...actualInventory,
       status: "processed",
     });
+  };
+
+  const handleSyncInventory = async () => {
+    if (!isOffline) return;
   };
 
   const getStatusColor = (status: string) => {
@@ -87,12 +105,14 @@ export function InventoryDetailScreen() {
   };
 
   useEffect(() => {
+    if (isOffline) return;
+
     (async () =>
       await storageUpdateInventoryHistory({
-        ...inventory,
+        ...actualInventory,
         status: processedStatus,
       }))();
-  }, [inventory, processedStatus]);
+  }, [inventory, processedStatus, isOffline, actualInventory]);
 
   return (
     <VStack className="flex-1 bg-white">
@@ -108,7 +128,9 @@ export function InventoryDetailScreen() {
                   className="text-xl font-bold text-gray-800"
                   numberOfLines={1}
                 >
-                  {inventory.identifier}
+                  {isOffline
+                    ? offlineInventory.temporary_id
+                    : actualInventory.identifier}
                 </Text>
               </HStack>
             </View>
@@ -134,14 +156,27 @@ export function InventoryDetailScreen() {
           </HStack>
 
           {/* Quantity */}
-          <View className="mb-4">
-            <Text className="text-base font-medium text-gray-800">
-              Quantidade Total:
-            </Text>
-            <Text className="text-2xl font-bold text-teal-600">
-              {inventory.total_quantity}
-            </Text>
-          </View>
+          <HStack>
+            <VStack className="mb-4">
+              <Text className="text-base font-medium text-gray-800">
+                Quantidade Total:
+              </Text>
+              <Text className="text-2xl font-bold text-teal-600">
+                {inventory.total_quantity}
+              </Text>
+            </VStack>
+            {isOffline && (
+              <Icon
+                as={
+                  offlineInventory.errors.length > 0
+                    ? CloudDownload
+                    : CloudUpload
+                }
+                size={24}
+                className={`ml-auto ${offlineInventory.errors.length > 0 ? "text-red-500" : "text-teal-500"}`}
+              />
+            )}
+          </HStack>
 
           {/* Establishment Info */}
           <VStack className="gap-2 border-t border-gray-500 pt-3">
@@ -183,23 +218,42 @@ export function InventoryDetailScreen() {
           <Text className="font-medium text-teal-600">{totalItems} itens</Text>
         </HStack>
 
-        {!isConnected ? (
+        {isOffline ? (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            data={offlineInventory.books}
+            keyExtractor={(item) => item.book_id}
+            onEndReachedThreshold={0.5}
+            ListEmptyComponent={() => (
+              <Text className="mt-4 text-center font-poppins text-2xl text-gray-600">
+                Inventário vazio...
+              </Text>
+            )}
+            renderItem={({ item: inventoryBook }) => (
+              <BookCard
+                quantity={inventoryBook.quantity}
+                book={inventoryBook.book}
+              />
+            )}
+          />
+        ) : isConnected && isPending ? (
+          <View className="flex-1 items-center justify-center">
+            <Spinner size="large" />
+          </View>
+        ) : !isConnected ? (
           <View className="flex-1 items-center justify-center">
             <Icon as={CloudOff} className="text-teal-700" size={48} />
             <Text className="mt-2 text-lg text-gray-800">
               Sem conexão com a internet
             </Text>
           </View>
-        ) : isPending ? (
-          <View className="flex-1 items-center justify-center">
-            <Spinner size="large" />
-          </View>
         ) : (
           <FlatList
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
             data={books}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.book_id}
             refreshing={isRefetching}
             onRefresh={refetch}
             onEndReached={() => hasNextPage && fetchNextPage()}
@@ -225,11 +279,11 @@ export function InventoryDetailScreen() {
           <Button
             disabled={isProcessing}
             isLoading={isProcessing}
-            onPress={handleProcessInventory}
+            onPress={isOffline ? handleSyncInventory : handleProcessInventory}
             className="mb-6 h-14 items-center justify-center rounded-xl bg-[#2BADA1] data-[active=true]:bg-teal-400"
           >
             <Text className="text-lg font-bold text-white">
-              Processar Inventário
+              {isOffline ? "Sincronizar" : "Processar"} Inventário
             </Text>
           </Button>
         )}

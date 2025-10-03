@@ -161,7 +161,9 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
       >
         <Animated.View style={[animatedStyle, { borderRadius: 16 }]}>
           <Pressable
-            onPress={() => navigate("inventoryDetails", { inventory })}
+            onPress={() =>
+              navigate("inventoryDetails", { inventory, isOffline: false })
+            }
             collapsable={false}
             className="mb-6 rounded-xl border border-gray-500 bg-white p-4 shadow-md"
           >

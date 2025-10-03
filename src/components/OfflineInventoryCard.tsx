@@ -130,7 +130,12 @@ export function OfflineInventoryCard({
       >
         <Animated.View style={[animatedStyle, { borderRadius: 16 }]}>
           <Pressable
-            // onPress={() => navigate("inventoryDetails", { inventory })}
+            onPress={() =>
+              navigate("inventoryDetails", {
+                inventory: offlineInventory,
+                isOffline: true,
+              })
+            }
             className="mb-6 rounded-xl border border-gray-500 bg-white p-4 shadow-md"
           >
             <View className="mb-3 flex-row items-start justify-between">

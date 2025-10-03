@@ -194,6 +194,12 @@ export function InventoryActions() {
 
   async function handleEditInventory() {
     if (isConnected) {
+      if (offlineInventory) {
+        await handleEditOfflineInventory();
+        navigate("inventories");
+        return;
+      }
+
       if (!inventory) return;
 
       await editInventory({

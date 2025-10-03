@@ -22,8 +22,8 @@ type AppRoutesType = {
   stock: undefined;
   inventories: undefined;
   inventoryDetails: {
-    inventory: Inventory;
-    offlineInventory?: OfflineInventory;
+    inventory: Inventory | OfflineInventory;
+    isOffline: boolean;
   };
   inventoryActions: {
     inventoryId?: string;

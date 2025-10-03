@@ -10,7 +10,7 @@ interface IResponse {
   lastPage: number;
 }
 
-export function useListInventoryBooks(inventoryId: string) {
+export function useListInventoryBooks(inventoryId?: string) {
   return useInfiniteQuery({
     queryKey: ["inventoryBooks", inventoryId],
     queryFn: async ({ pageParam = 1 }) => {
@@ -33,5 +33,6 @@ export function useListInventoryBooks(inventoryId: string) {
         pageParams: data.pageParams,
       };
     },
+    enabled: !!inventoryId,
   });
 }

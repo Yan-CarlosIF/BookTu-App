@@ -4,11 +4,25 @@ import { Select } from "@components/Select";
 import { useNavigation } from "@react-navigation/native";
 import { useListInventories } from "@useCases/Inventory/useListInventories";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
-import { Plus, Search } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  Plus,
+  Search,
+} from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionIcon,
+  AccordionItem,
+  AccordionTitleText,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Fab, FabIcon } from "@/components/ui/fab";
 import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
@@ -138,29 +152,87 @@ export function Inventories() {
             <Spinner size="large" />
           </View>
         ) : isConnected ? (
-          <Animated.FlatList
-            itemLayoutAnimation={LinearTransition.springify(500)}
-            showsVerticalScrollIndicator={false}
-            className="mt-12"
-            data={inventories}
-            keyExtractor={({ id }) => id}
-            renderItem={({ item: inventory }) => (
-              <InventoryCard inventory={inventory} />
+          <>
+            {offlineInventories.length > 0 && (
+              <Accordion
+                size="md"
+                type="single"
+                isCollapsible={true}
+                isDisabled={false}
+                className="mt-4 w-full border-0 bg-transparent shadow-none"
+              >
+                <AccordionItem
+                  value="offline"
+                  className="border-0 bg-transparent"
+                >
+                  <AccordionHeader>
+                    <AccordionTrigger className="px-0">
+                      {({ isExpanded }: { isExpanded: boolean }) => {
+                        return (
+                          <>
+                            <AccordionTitleText className="font-poppins-medium">
+                              Inventários offline
+                            </AccordionTitleText>
+                            {isExpanded ? (
+                              <AccordionIcon
+                                as={ChevronUpIcon}
+                                className="ml-3"
+                              />
+                            ) : (
+                              <AccordionIcon
+                                as={ChevronDownIcon}
+                                className="ml-3"
+                              />
+                            )}
+                          </>
+                        );
+                      }}
+                    </AccordionTrigger>
+                  </AccordionHeader>
+                  <AccordionContent className="border-0 bg-transparent">
+                    <Animated.FlatList
+                      className="mt-10"
+                      showsVerticalScrollIndicator={false}
+                      itemLayoutAnimation={LinearTransition.springify(500)}
+                      data={offlineInventories}
+                      keyExtractor={({ temporary_id }) => temporary_id}
+                      contentContainerStyle={{ paddingBottom: 75 }}
+                      renderItem={({ item: offlineInventory }) => (
+                        <OfflineInventoryCard
+                          onDelete={handleDeleteOfflineInventory}
+                          offlineInventory={offlineInventory}
+                        />
+                      )}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             )}
-            onEndReached={() => hasNextPage && fetchNextPage()}
-            onEndReachedThreshold={0.5}
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            contentContainerStyle={!hasNextPage && { paddingBottom: 75 }}
-            ListEmptyComponent={() => (
-              <Text className="text-center font-poppins text-2xl text-gray-600">
-                Nenhum inventário encontrado...
-              </Text>
-            )}
-            ListFooterComponent={
-              isFetchingNextPage ? <Spinner size="large" /> : null
-            }
-          />
+
+            <Animated.FlatList
+              itemLayoutAnimation={LinearTransition.springify(500)}
+              showsVerticalScrollIndicator={false}
+              className="mt-12"
+              data={inventories}
+              keyExtractor={({ id }) => id}
+              renderItem={({ item: inventory }) => (
+                <InventoryCard inventory={inventory} />
+              )}
+              onEndReached={() => hasNextPage && fetchNextPage()}
+              onEndReachedThreshold={0.5}
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              contentContainerStyle={!hasNextPage && { paddingBottom: 75 }}
+              ListEmptyComponent={() => (
+                <Text className="text-center font-poppins text-2xl text-gray-600">
+                  Nenhum inventário encontrado...
+                </Text>
+              )}
+              ListFooterComponent={
+                isFetchingNextPage ? <Spinner size="large" /> : null
+              }
+            />
+          </>
         ) : (
           <Animated.FlatList
             className="mt-12"
