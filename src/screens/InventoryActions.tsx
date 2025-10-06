@@ -1,6 +1,5 @@
 import { BookCard } from "@components/BookCard";
 import { BookSelector } from "@components/BookSelector";
-import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { Loading } from "@components/Loading";
 import { Select } from "@components/Select";
@@ -19,7 +18,6 @@ import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import {
   Check,
   ChevronDown,
-  ChevronLeft,
   CloudAlert,
   CloudOff,
   Plus,
@@ -281,7 +279,6 @@ export function InventoryActions() {
     })();
   }, [inventoryId, isConnected]);
 
-  // Buscar estabelecimentos offline
   useEffect(() => {
     if (isConnected) return;
     (async () => {
@@ -307,26 +304,29 @@ export function InventoryActions() {
 
   if (!isConnected && offlineEstablishments.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-6">
-        <Icon as={CloudOff} className="text-teal-700" size={52} />
-        <AlertUI
-          variant="solid"
-          className="mx-6 mt-4 rounded-md bg-teal-300/20"
-        >
-          <AlertIcon as={CloudAlert} className="text-teal-700" />
-          <AlertText className="ml-1 text-sm text-teal-700">
-            Você não tem dados salvos no dispositivo para criar um inventário.
-            Conecte-se à internet.
-          </AlertText>
-        </AlertUI>
-        <Button
-          onPress={goBack}
-          className="mt-4 bg-teal-700 data-[active=true]:bg-teal-600"
-        >
-          <Icon as={ChevronLeft} className="text-white" />
-          <Text className="text-white">Voltar</Text>
-        </Button>
-      </View>
+      <>
+        <Header
+          onPress={handleNavigate}
+          title={
+            isCreateAction && !isOfflineEditAction
+              ? "Criar Inventário"
+              : `Editar Inventário ${inventory?.identifier ?? "offline"}`
+          }
+        />
+        <View className="flex-1 items-center justify-center bg-white px-6">
+          <Icon as={CloudOff} className="text-teal-700" size={52} />
+          <AlertUI
+            variant="solid"
+            className="mx-6 mt-4 rounded-md bg-teal-300/20"
+          >
+            <AlertIcon as={CloudAlert} className="text-teal-700" />
+            <AlertText className="ml-1 text-sm text-teal-700">
+              Você não tem dados salvos no dispositivo para criar um inventário,
+              conecte-se à internet.
+            </AlertText>
+          </AlertUI>
+        </View>
+      </>
     );
   }
 
