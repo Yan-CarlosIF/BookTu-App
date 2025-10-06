@@ -1,7 +1,13 @@
 import { Input } from "@components/Input";
 import { Search } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  FlatList,
+  ListRenderItemInfo,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,9 +30,7 @@ export function BookSelector({ inventoryBooks, setBooks }: BookSelectorProps) {
   const { isConnected } = useNetInfo();
 
   const [search, setSearch] = useState("");
-
   const [offlineBooks, setOfflineBooks] = useState<Book[]>([]);
-
   const { data, isLoading } = useSearchAllBooks(search);
 
   function handleSelectBook(book: Book) {
@@ -60,6 +64,19 @@ export function BookSelector({ inventoryBooks, setBooks }: BookSelectorProps) {
 
   const hasBooksToSelect = selectableBooks && selectableBooks.length > 0;
 
+  const renderItem = ({ item }: ListRenderItemInfo<Book>) => (
+    <Pressable
+      key={item.id}
+      onPress={() => handleSelectBook(item)}
+      className="border-b-1 flex-row items-center border-gray-200 p-3"
+    >
+      <Badge className="w-18 mr-2 items-center justify-center rounded-sm bg-slate-100">
+        <BadgeText className="font-bold">{item.identifier}</BadgeText>
+      </Badge>
+      <Text>- {item.title}</Text>
+    </Pressable>
+  );
+
   return (
     <View style={{ position: "relative" }}>
       <Input
@@ -74,25 +91,13 @@ export function BookSelector({ inventoryBooks, setBooks }: BookSelectorProps) {
       {!!search &&
         (hasBooksToSelect ? (
           <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 rounded-lg border border-gray-500 bg-white">
-            <ScrollView
-              className="max-h-[200px]"
+            <FlatList
+              data={selectableBooks}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
               keyboardShouldPersistTaps="handled"
-            >
-              {selectableBooks.map((book: Book) => (
-                <Pressable
-                  key={book.id}
-                  onPress={() => handleSelectBook(book)}
-                  className="border-b-1 flex-row items-center border-gray-200 p-3"
-                >
-                  <Badge className="w-18 mr-2 items-center justify-center rounded-sm bg-slate-100">
-                    <BadgeText className="font-bold">
-                      {book.identifier}
-                    </BadgeText>
-                  </Badge>
-                  <Text>- {book.title}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
+              style={{ maxHeight: 200 }}
+            />
           </View>
         ) : !isLoading && selectableBooks && selectableBooks.length === 0 ? (
           <View className="elevation-lg absolute left-0 right-0 top-[70px] z-10 h-[50px] items-center justify-center rounded-lg border border-gray-500 bg-white">

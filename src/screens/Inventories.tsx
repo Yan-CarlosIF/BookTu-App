@@ -241,6 +241,11 @@ export function Inventories() {
             data={offlineInventories}
             keyExtractor={({ temporary_id }) => temporary_id}
             contentContainerStyle={{ paddingBottom: 75 }}
+            ListEmptyComponent={() => (
+              <Text className="text-center font-poppins text-xl text-gray-600">
+                Nenhum inventário offline encontrado...
+              </Text>
+            )}
             renderItem={({ item: offlineInventory }) => (
               <OfflineInventoryCard
                 onDelete={handleDeleteOfflineInventory}
