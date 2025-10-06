@@ -1,7 +1,7 @@
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Select } from "@components/Select";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useListInventories } from "@useCases/Inventory/useListInventories";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import {
@@ -10,8 +10,8 @@ import {
   Plus,
   Search,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Dimensions, Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
 import {
@@ -110,7 +110,7 @@ export function Inventories() {
     }
   }
 
-  useEffect(() => {
+  useFocusEffect(() => {
     try {
       setIsOfflineInventoriesPending(true);
 
@@ -123,7 +123,7 @@ export function Inventories() {
     } finally {
       setIsOfflineInventoriesPending(false);
     }
-  }, []);
+  });
 
   const isLoading = isConnected ? isPending : isOfflineInventoriesPending;
 
@@ -190,20 +190,26 @@ export function Inventories() {
                     </AccordionTrigger>
                   </AccordionHeader>
                   <AccordionContent className="border-0 bg-transparent">
-                    <Animated.FlatList
-                      className="mt-10"
-                      showsVerticalScrollIndicator={false}
-                      itemLayoutAnimation={LinearTransition.springify(500)}
-                      data={offlineInventories}
-                      keyExtractor={({ temporary_id }) => temporary_id}
-                      contentContainerStyle={{ paddingBottom: 75 }}
-                      renderItem={({ item: offlineInventory }) => (
-                        <OfflineInventoryCard
-                          onDelete={handleDeleteOfflineInventory}
-                          offlineInventory={offlineInventory}
-                        />
-                      )}
-                    />
+                    <View
+                      style={{
+                        maxHeight: Dimensions.get("window").height - 200,
+                      }}
+                    >
+                      <Animated.FlatList
+                        className="mt-4"
+                        showsVerticalScrollIndicator={false}
+                        itemLayoutAnimation={LinearTransition.springify(500)}
+                        data={offlineInventories}
+                        keyExtractor={({ temporary_id }) => temporary_id}
+                        contentContainerStyle={{ paddingBottom: 75 }}
+                        renderItem={({ item: offlineInventory }) => (
+                          <OfflineInventoryCard
+                            onDelete={handleDeleteOfflineInventory}
+                            offlineInventory={offlineInventory}
+                          />
+                        )}
+                      />
+                    </View>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -212,7 +218,7 @@ export function Inventories() {
             <Animated.FlatList
               itemLayoutAnimation={LinearTransition.springify(500)}
               showsVerticalScrollIndicator={false}
-              className="mt-4"
+              className={offlineInventories.length > 0 ? "mt-4" : "mt-12"}
               data={inventories}
               keyExtractor={({ id }) => id}
               renderItem={({ item: inventory }) => (

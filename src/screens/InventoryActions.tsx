@@ -18,7 +18,7 @@ import {
   MenuIcon,
   Plus,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
@@ -46,7 +46,7 @@ import { storageGetFilteredEstablishments } from "../storage/StorageBooksAndEsta
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 import {
   storageSetOfflineInventories,
-  storageUpdateOfflineInventories,
+  storageUpdateOfflineInventory,
 } from "../storage/StorageOfflineInventories";
 
 type RouteParams = {
@@ -97,16 +97,6 @@ export function InventoryActions() {
 
   let initialEstablishment = inventory?.establishment_id ?? undefined;
 
-  if (offlineInventory) {
-    if (
-      !offlineInventory.errors.find((error) => error.type === "establishment")
-    ) {
-      initialEstablishment = undefined;
-    } else {
-      initialEstablishment = offlineInventory.establishment_id;
-    }
-  }
-
   const establishments = establishmentsData?.reduce((obj, establishment) => {
     obj.push({
       label: establishment.name,
@@ -119,6 +109,16 @@ export function InventoryActions() {
 
     return obj;
   }, [] as EstablishmentFilterItem[]);
+
+  if (offlineInventory) {
+    if (
+      offlineInventory.errors.find((error) => error.type === "establishment")
+    ) {
+      initialEstablishment = undefined;
+    } else {
+      initialEstablishment = offlineInventory.establishment_id;
+    }
+  }
 
   const [selectedEstablishment, setSelectedEstablishment] = useState<
     string | undefined
@@ -236,7 +236,7 @@ export function InventoryActions() {
     try {
       setIsOfflineActionPending(true);
 
-      await storageUpdateOfflineInventories(
+      await storageUpdateOfflineInventory(
         {
           establishment_id: selectedEstablishment ?? "",
           total_quantity: total,
@@ -289,6 +289,11 @@ export function InventoryActions() {
 
     goBack();
   }
+
+  const selectOptions = useMemo(
+    () => (isConnected ? (establishments ?? []) : offlineEstablishments),
+    [isConnected, establishments, offlineEstablishments],
+  );
 
   function handleDeleteBook(bookId: string) {
     setInventoryBooks((prev) =>
@@ -372,7 +377,7 @@ export function InventoryActions() {
       />
       <VStack className="mt-7 flex-1 px-6">
         <Select
-          options={isConnected ? (establishments ?? []) : offlineEstablishments}
+          options={selectOptions}
           selectedFilter={selectedEstablishment}
           setSelectedFilter={setSelectedEstablishment}
           Icon={ChevronDown}

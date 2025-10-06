@@ -42,7 +42,10 @@ export function InventoryActionSheet({
     if (!isConnected) return;
 
     await processInventory(inventory.id);
-    await storageUpdateInventoryHistory(inventory);
+    await storageUpdateInventoryHistory({
+      ...inventory,
+      status: "processed",
+    });
     onClose();
   }
 

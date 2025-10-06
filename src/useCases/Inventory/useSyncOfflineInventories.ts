@@ -46,15 +46,9 @@ export function useSyncOfflineInventories() {
     },
 
     onSuccess: (data) => {
-      if (data.wasCreated) {
-        queryClient.invalidateQueries({ queryKey: ["inventories"] });
+      if (!data.wasCreated) return;
 
-        toast.show({
-          message: "Inventários sincronizados com sucesso",
-          variant: "success",
-          duration: 3000,
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: ["inventories"] });
     },
 
     onError: (error: AxiosError<{ message: string }>) => {

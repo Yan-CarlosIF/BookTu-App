@@ -1,7 +1,7 @@
 import { BookCard } from "@components/BookCard";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useListInventoryBooks } from "@useCases/Inventory/useListInventoryBooks";
 import { useProcessInventory } from "@useCases/Inventory/useProcessInventory";
 import {
@@ -25,11 +25,20 @@ import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
 import { useNetInfo } from "../hooks/useNetInfo";
+import { useToast } from "../hooks/useToast";
+import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Inventory } from "../shared/types/inventory";
 import { OfflineInventory } from "../shared/types/offlineInventory";
 import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
+import {
+  storageRemoveOfflineInventory,
+  storageUpdateOfflineInventory,
+} from "../storage/StorageOfflineInventories";
+import { useSyncOfflineInventories } from "../useCases/Inventory/useSyncOfflineInventories";
 
 export function InventoryDetailScreen() {
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+  const toast = useToast();
   const { isConnected } = useNetInfo();
   const { params } = useRoute();
   const { inventory, isOffline } = params as {
@@ -57,6 +66,9 @@ export function InventoryDetailScreen() {
   const { mutateAsync: processInventory, isPending: isProcessing } =
     useProcessInventory();
 
+  const { mutateAsync: syncOfflineInventory, isPending: isSyncing } =
+    useSyncOfflineInventories();
+
   const books = data?.items ?? offlineInventory?.books ?? [];
   const totalItems = data?.total ?? offlineInventory?.books?.length ?? 0;
 
@@ -73,6 +85,38 @@ export function InventoryDetailScreen() {
 
   const handleSyncInventory = async () => {
     if (!isOffline) return;
+
+    const response = await syncOfflineInventory({
+      establishment_id: offlineInventory.establishment_id,
+      inventoryBooks: offlineInventory.books.map((book) => ({
+        book_id: book.book_id,
+        quantity: book.quantity,
+      })),
+      total_quantity: offlineInventory.total_quantity,
+    });
+
+    if (!response.wasCreated) {
+      await storageUpdateOfflineInventory(
+        {
+          ...offlineInventory,
+          errors: response.errors,
+        },
+        offlineInventory.temporary_id,
+      );
+
+      toast.show({
+        message: "Erro ao sincronizar inventário offline",
+        variant: "error",
+      });
+    } else {
+      toast.show({
+        message: "Inventário sincronizado com sucesso",
+        variant: "success",
+      });
+
+      await storageRemoveOfflineInventory(offlineInventory.temporary_id);
+      navigate("inventories");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -275,18 +319,19 @@ export function InventoryDetailScreen() {
           />
         )}
 
-        {(processedStatus === "unprocessed" || isProcessing) && isConnected && (
-          <Button
-            disabled={isProcessing}
-            isLoading={isProcessing}
-            onPress={isOffline ? handleSyncInventory : handleProcessInventory}
-            className="mb-6 h-14 items-center justify-center rounded-xl bg-[#2BADA1] data-[active=true]:bg-teal-400"
-          >
-            <Text className="text-lg font-bold text-white">
-              {isOffline ? "Sincronizar" : "Processar"} Inventário
-            </Text>
-          </Button>
-        )}
+        {(processedStatus === "unprocessed" || isProcessing || isSyncing) &&
+          isConnected && (
+            <Button
+              disabled={isProcessing || isSyncing}
+              isLoading={isProcessing || isSyncing}
+              onPress={isOffline ? handleSyncInventory : handleProcessInventory}
+              className="mb-6 h-14 items-center justify-center rounded-xl bg-[#2BADA1] data-[active=true]:bg-teal-400"
+            >
+              <Text className="text-lg font-bold text-white">
+                {isOffline ? "Sincronizar" : "Processar"} Inventário
+              </Text>
+            </Button>
+          )}
       </VStack>
     </VStack>
   );

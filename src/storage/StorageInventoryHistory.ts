@@ -46,8 +46,6 @@ async function storageRemoveInventoryHistory(id: string) {
 
   const inventoryIndex = data.findIndex((inventory) => inventory.id === id);
 
-  console.log("inventário achado: ", inventoryIndex !== -1);
-
   if (inventoryIndex === -1) return;
 
   data.splice(inventoryIndex, 1);

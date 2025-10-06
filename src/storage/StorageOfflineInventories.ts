@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Book } from "../shared/types/book";
+import { Establishment } from "../shared/types/establishment";
 import {
   OfflineInventory,
   OfflineInventoryError,
@@ -28,7 +29,7 @@ async function storageGetOfflineInventories() {
   return inventories;
 }
 
-async function storageUpdateOfflineInventories(
+async function storageUpdateOfflineInventory(
   data: CreateOfflineInventorySchema & { errors: OfflineInventoryError[] },
   offlineInventoryId: string,
 ) {
@@ -43,7 +44,19 @@ async function storageUpdateOfflineInventories(
   if (inventories[inventoryIndex].establishment_id !== data.establishment_id) {
     const establishment = await storageGetEstablishment(data.establishment_id);
 
-    inventories[inventoryIndex].establishment = establishment;
+    inventories[inventoryIndex].establishment =
+      establishment ??
+      ({
+        id: data.establishment_id,
+        cep: "desconhecido",
+        city: "desconhecido",
+        complement: "desconhecido",
+        cnpj: "desconhecido",
+        district: "desconhecido",
+        name: "Estabelecimento desconhecido",
+        state: "desconhecido",
+        description: "",
+      } as Establishment);
     inventories[inventoryIndex].establishment_id = data.establishment_id;
   }
 
@@ -110,5 +123,5 @@ export {
   storageSetOfflineInventories,
   storageClearOfflineInventories,
   storageRemoveOfflineInventory,
-  storageUpdateOfflineInventories,
+  storageUpdateOfflineInventory,
 };
