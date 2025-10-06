@@ -2,6 +2,10 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Select } from "@components/Select";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import {
+  storageGetOfflineInventories,
+  storageRemoveOfflineInventory,
+} from "@storage/StorageOfflineInventories";
 import { useListInventories } from "@useCases/Inventory/useListInventories";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import {
@@ -10,7 +14,7 @@ import {
   Plus,
   Search,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Dimensions, Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
@@ -34,16 +38,11 @@ import { useNetInfo } from "../hooks/useNetInfo";
 import { useToast } from "../hooks/useToast";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { OfflineInventory } from "../shared/types/offlineInventory";
-import {
-  storageGetOfflineInventories,
-  storageRemoveOfflineInventory,
-} from "../storage/StorageOfflineInventories";
 
 export function Inventories() {
   const toast = useToast();
   const { isConnected } = useNetInfo();
-  const { data: establishmentsData, isPending: isPendingEstablishments } =
-    useGetAllEstablishments();
+
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
   const [search, setSearch] = useState("");
@@ -58,6 +57,9 @@ export function Inventories() {
     OfflineInventory[]
   >([]);
 
+  const { data: establishments, isPending: isPendingEstablishments } =
+    useGetAllEstablishments();
+
   const {
     data,
     hasNextPage,
@@ -69,22 +71,6 @@ export function Inventories() {
   } = useListInventories(selectedFilter, debouncedSearch);
 
   const inventories = data?.pages.flatMap((page) => page.data) ?? [];
-
-  let establishments: { label: string; value: string }[] = [];
-
-  if (!isPendingEstablishments) {
-    establishments =
-      establishmentsData?.reduce(
-        (obj, establishment) => {
-          obj.push({
-            label: establishment.name,
-            value: establishment.id,
-          });
-          return obj;
-        },
-        [] as { label: string; value: string }[],
-      ) ?? [];
-  }
 
   async function handleDeleteOfflineInventory(offlineInventoryId: string) {
     try {
@@ -110,20 +96,36 @@ export function Inventories() {
     }
   }
 
-  useFocusEffect(() => {
-    try {
-      setIsOfflineInventoriesPending(true);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
 
-      (async () => {
-        const inventories = await storageGetOfflineInventories();
-        setOfflineInventories(inventories);
-      })();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsOfflineInventoriesPending(false);
-    }
-  });
+      async function loadOfflineInventories() {
+        try {
+          setIsOfflineInventoriesPending(true);
+
+          const inventories = await storageGetOfflineInventories();
+
+          if (isActive) {
+            setOfflineInventories(inventories);
+          }
+        } catch (error) {
+          console.log(error);
+        } finally {
+          if (isActive) {
+            setIsOfflineInventoriesPending(false);
+          }
+        }
+      }
+
+      loadOfflineInventories();
+
+      // cleanup evita setState após desmontagem
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   const isLoading = isConnected ? isPending : isOfflineInventoriesPending;
 
@@ -140,7 +142,7 @@ export function Inventories() {
           rightIcon={
             <Select
               isDisabled={isPendingEstablishments || !isConnected}
-              options={establishments}
+              options={establishments ?? []}
               selectedFilter={selectedFilter}
               setSelectedFilter={setSelectedFilter}
             />

@@ -11,5 +11,18 @@ export function useGetAllEstablishments() {
 
       return data;
     },
+    select: (data) => {
+      return data.reduce(
+        (establishments, { name, id }) => {
+          establishments.push({
+            label: name,
+            value: id,
+          });
+
+          return establishments;
+        },
+        [] as { label: string; value: string }[],
+      );
+    },
   });
 }

@@ -1,4 +1,5 @@
 import { TapGesture } from "@components/TapGesture";
+import { InventoryHistory } from "@storage/StorageInventoryHistory";
 import {
   Building2,
   Calendar,
@@ -11,7 +12,6 @@ import { Pressable, Text } from "react-native";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 
-import { InventoryHistory } from "../storage/StorageInventoryHistory";
 import { formatDate } from "../utils/formatDate";
 
 interface HistoryCardProps {

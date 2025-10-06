@@ -1,10 +1,10 @@
 import { Header } from "@components/Header";
 import { Loading } from "@components/Loading";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { useGetBook } from "@useCases/Book/useGetBook";
 import {
   CalendarDays,
-  ChevronLeft,
+  CloudAlert,
   CloudOff,
   DollarSign,
   Fingerprint,
@@ -13,17 +13,16 @@ import {
 } from "lucide-react-native";
 import { FlatList, ScrollView, Text, View } from "react-native";
 
+import { Alert, AlertIcon, AlertText } from "@/components/ui/alert";
 import { Grid, GridItem } from "@/components/ui/grid";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { VStack } from "@/components/ui/vstack";
 
-import { Button } from "../components/Button";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { formatPrice } from "../utils/formatPrice";
 
 export function BookDetails() {
-  const { goBack } = useNavigation();
   const { isConnected } = useNetInfo();
 
   const { params } = useRoute();
@@ -34,19 +33,22 @@ export function BookDetails() {
 
   if (!isConnected) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-6">
-        <Icon as={CloudOff} className="text-teal-700" size={52} />
-        <Text className="text mt-4 text-center font-medium text-gray-800">
-          É necessário conexão com a internet para acessar os detalhes do livro
-        </Text>
-        <Button
-          onPress={goBack}
-          className="mt-4 bg-teal-500 data-[active=true]:bg-teal-400"
-        >
-          <Icon as={ChevronLeft} className="text-white" size={16} />
-          <Text className="font-medium text-white">Voltar</Text>
-        </Button>
-      </View>
+      <>
+        <Header title="Detalhes do Livro" />
+        <View className="flex-1 items-center justify-center bg-white px-6">
+          <Icon as={CloudOff} className="text-teal-700" size={52} />
+          <Alert
+            variant="solid"
+            className="mx-6 mt-4 rounded-md bg-teal-300/20"
+          >
+            <AlertIcon as={CloudAlert} className="text-teal-700" />
+            <AlertText className="ml-1 text-sm text-teal-700">
+              É necessário conexão com a internet para acessar os detalhes do
+              livro
+            </AlertText>
+          </Alert>
+        </View>
+      </>
     );
   }
 

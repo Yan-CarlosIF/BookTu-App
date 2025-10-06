@@ -2,6 +2,17 @@ import { Button } from "@components/Button";
 import { HistoryCard } from "@components/HistoryCard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
+  storageGetRefetchTimestamp,
+  storageSetBooks,
+  storageSetEstablishments,
+  storageSetRefetchTimestamp,
+} from "@storage/StorageBooksAndEstablishments";
+import {
+  InventoryHistory,
+  storageGetInventoryHistory,
+} from "@storage/StorageInventoryHistory";
+import { storageGetOfflineInventories } from "@storage/StorageOfflineInventories";
+import {
   Book as BookIcon,
   Box,
   ClipboardList,
@@ -24,17 +35,6 @@ import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Book } from "../shared/types/book";
 import { Establishment } from "../shared/types/establishment";
 import { Inventory } from "../shared/types/inventory";
-import {
-  storageGetRefetchTimestamp,
-  storageSetBooks,
-  storageSetEstablishments,
-  storageSetRefetchTimestamp,
-} from "../storage/StorageBooksAndEstablishments";
-import {
-  InventoryHistory,
-  storageGetInventoryHistory,
-} from "../storage/StorageInventoryHistory";
-import { storageGetOfflineInventories } from "../storage/StorageOfflineInventories";
 import { SyncInventoryResponse } from "../useCases/Inventory/useSyncOfflineInventories";
 
 export type SyncInventoryError = SyncInventoryResponse & {

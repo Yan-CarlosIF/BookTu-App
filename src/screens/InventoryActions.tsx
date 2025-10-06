@@ -1,24 +1,30 @@
 import { BookCard } from "@components/BookCard";
 import { BookSelector } from "@components/BookSelector";
+import { Button } from "@components/Button";
 import { Header } from "@components/Header";
+import { Loading } from "@components/Loading";
 import { Select } from "@components/Select";
 import { SwipeToDelete } from "@components/SwipeToDelete";
 import { UpdateProductDialog } from "@components/UpdateProductDialog";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { storageGetFilteredEstablishments } from "@storage/StorageBooksAndEstablishments";
+import { storageUpdateInventoryHistory } from "@storage/StorageInventoryHistory";
+import {
+  storageSetOfflineInventories,
+  storageUpdateOfflineInventory,
+} from "@storage/StorageOfflineInventories";
 import { useCreateInventory } from "@useCases/Inventory/useCreateInventory";
 import { useEditInventory } from "@useCases/Inventory/useEditInventory";
 import { useGetAllEstablishments } from "@useCases/useGetAllEstablishments";
 import {
-  BrushCleaning,
   Check,
   ChevronDown,
   ChevronLeft,
   CloudAlert,
   CloudOff,
-  MenuIcon,
   Plus,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
@@ -26,13 +32,10 @@ import { Alert as AlertUI, AlertIcon, AlertText } from "@/components/ui/alert";
 import { Fab, FabIcon, FabLabel } from "@/components/ui/fab";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
-import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { SelectInput } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { VStack } from "@/components/ui/vstack";
 
-import { Button } from "../components/Button";
-import { Loading } from "../components/Loading";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { useToast } from "../hooks/useToast";
 import { api } from "../lib/api";
@@ -42,12 +45,6 @@ import { Inventory } from "../shared/types/inventory";
 import { InventoryBook } from "../shared/types/inventoryBook";
 import { OfflineInventory } from "../shared/types/offlineInventory";
 import { OfflineInventoryBook } from "../shared/types/offlineInventoryBook";
-import { storageGetFilteredEstablishments } from "../storage/StorageBooksAndEstablishments";
-import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
-import {
-  storageSetOfflineInventories,
-  storageUpdateOfflineInventory,
-} from "../storage/StorageOfflineInventories";
 
 type RouteParams = {
   inventoryId?: string;
@@ -55,23 +52,19 @@ type RouteParams = {
   offlineInventory?: OfflineInventory;
 };
 
-type IResponse = Inventory & {
-  books: InventoryBook[];
-};
+type IResponse = Inventory & { books: InventoryBook[] };
+type EstablishmentFilterItem = { label: string; value: string };
 
-export type InventoryItem = Book & {
-  quantity: number;
-};
-
-type EstablishmentFilterItem = {
-  label: string;
-  value: string;
-};
+export type InventoryItem = Book & { quantity: number };
 
 export function InventoryActions() {
   const toast = useToast();
   const { isConnected } = useNetInfo();
   const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
+
+  const {
+    params: { inventoryId, inventory, offlineInventory },
+  } = useRoute() as { params: RouteParams };
 
   const [loading, setLoading] = useState(false);
   const [isOfflineActionPending, setIsOfflineActionPending] = useState(false);
@@ -80,45 +73,27 @@ export function InventoryActions() {
     EstablishmentFilterItem[]
   >([]);
 
-  const {
-    params: { inventoryId, inventory, offlineInventory },
-  } = useRoute() as { params: RouteParams };
   const isCreateAction = !inventoryId && !inventory;
   const isOfflineEditAction = !!offlineInventory?.temporary_id;
 
-  const offlineInventoryBooksErrorsIds =
-    offlineInventory?.errors?.map((error) => {
-      if (error.type === "book") {
-        return error.id;
-      }
-    }) ?? [];
+  const offlineInventoryBooksErrorsIds = useMemo(
+    () =>
+      offlineInventory?.errors
+        ?.filter((e) => e.type === "book")
+        .map((e) => e.id) ?? [],
+    [offlineInventory],
+  );
 
-  const { data: establishmentsData } = useGetAllEstablishments();
+  const { data: establishments } = useGetAllEstablishments();
 
-  let initialEstablishment = inventory?.establishment_id ?? undefined;
-
-  const establishments = establishmentsData?.reduce((obj, establishment) => {
-    obj.push({
-      label: establishment.name,
-      value: establishment.id,
-    });
-
-    if (inventory?.establishment_id === establishment.id) {
-      initialEstablishment = establishment.id;
+  let initialEstablishment = useMemo(() => {
+    if (offlineInventory) {
+      return offlineInventory.errors.some((e) => e.type === "establishment")
+        ? undefined
+        : offlineInventory.establishment_id;
     }
-
-    return obj;
-  }, [] as EstablishmentFilterItem[]);
-
-  if (offlineInventory) {
-    if (
-      offlineInventory.errors.find((error) => error.type === "establishment")
-    ) {
-      initialEstablishment = undefined;
-    } else {
-      initialEstablishment = offlineInventory.establishment_id;
-    }
-  }
+    return inventory?.establishment_id ?? undefined;
+  }, [inventory, offlineInventory]);
 
   const [selectedEstablishment, setSelectedEstablishment] = useState<
     string | undefined
@@ -128,199 +103,187 @@ export function InventoryActions() {
     InventoryBook[] | OfflineInventoryBook[]
   >(offlineInventory?.books ?? []);
 
-  const total = inventoryBooks.reduce((total, book) => {
-    return total + book.quantity;
-  }, 0);
+  const total = useMemo(
+    () => inventoryBooks.reduce((sum, b) => sum + b.quantity, 0),
+    [inventoryBooks],
+  );
 
   const { mutateAsync: createInventory, isPending: isCreatePending } =
     useCreateInventory();
   const { mutateAsync: editInventory, isPending: isEditPending } =
     useEditInventory();
 
-  function handleClearInventory() {
-    Alert.alert(
-      "Limpar inventário",
-      "Tem certeza que deseja limpar o inventário?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Limpar",
-          onPress: () => {
-            setInventoryBooks([]);
-          },
-          style: "destructive",
-        },
-      ],
-    );
-  }
-
-  async function handleCreateInventory() {
-    if (!isCreateAction) return;
-
-    if (isConnected) {
-      await createInventory({
-        establishment_id: selectedEstablishment ?? "",
-        total_quantity: total,
-        inventoryBooks: inventoryBooks.map((inventoryBook) => ({
-          book_id: inventoryBook.book_id,
-          quantity: inventoryBook.quantity,
-        })),
-      });
-    } else {
-      await handleCreateOfflineInventory();
-      navigate("inventories");
-    }
-  }
-
-  async function handleCreateOfflineInventory() {
+  const handleCreateOfflineInventory = useCallback(async () => {
+    setIsOfflineActionPending(true);
     try {
-      setIsOfflineActionPending(true);
-
       await storageSetOfflineInventories({
         establishment_id: selectedEstablishment ?? "",
         total_quantity: total,
-        books: inventoryBooks.map((inventoryBook) => ({
-          book_id: inventoryBook.book_id,
-          book: inventoryBook.book,
-          quantity: inventoryBook.quantity,
+        books: inventoryBooks.map(({ book_id, book, quantity }) => ({
+          book_id,
+          book,
+          quantity,
         })),
       });
-
       toast.show({
         message: "Inventário salvo offline com sucesso",
         variant: "success",
-        duration: 3000,
       });
     } catch {
       toast.show({
         message: "Erro ao salvar inventário offline",
         variant: "error",
-        duration: 3000,
       });
     } finally {
       setIsOfflineActionPending(false);
     }
-  }
+  }, [inventoryBooks, selectedEstablishment, toast, total]);
 
-  async function handleEditInventory() {
+  const handleCreateInventory = useCallback(async () => {
+    if (!isCreateAction) return;
+    if (isConnected) {
+      await createInventory({
+        establishment_id: selectedEstablishment ?? "",
+        total_quantity: total,
+        inventoryBooks: inventoryBooks.map(({ book_id, quantity }) => ({
+          book_id,
+          quantity,
+        })),
+      });
+    } else {
+      await handleCreateOfflineInventory();
+    }
+    navigate("inventories");
+  }, [
+    isCreateAction,
+    isConnected,
+    createInventory,
+    handleCreateOfflineInventory,
+    navigate,
+    inventoryBooks,
+    selectedEstablishment,
+    total,
+  ]);
+
+  const handleEditOfflineInventory = useCallback(async () => {
+    setIsOfflineActionPending(true);
+    try {
+      await storageUpdateOfflineInventory(
+        {
+          establishment_id: selectedEstablishment ?? "",
+          total_quantity: total,
+          books: inventoryBooks.map(({ book_id, book, quantity }) => ({
+            book_id,
+            book,
+            quantity,
+          })),
+          errors: [],
+        },
+        offlineInventory?.temporary_id ?? "",
+      );
+      toast.show({
+        message: "Inventário offline editado com sucesso",
+        variant: "success",
+      });
+    } catch {
+      toast.show({
+        message: "Erro ao editar inventário offline",
+        variant: "error",
+      });
+    } finally {
+      setIsOfflineActionPending(false);
+    }
+  }, [
+    inventoryBooks,
+    offlineInventory?.temporary_id,
+    selectedEstablishment,
+    toast,
+    total,
+  ]);
+
+  const handleEditInventory = useCallback(async () => {
     if (isConnected) {
       if (offlineInventory) {
         await handleEditOfflineInventory();
         navigate("inventories");
         return;
       }
-
       if (!inventory) return;
 
       await editInventory({
         id: inventory.id,
         establishment_id: selectedEstablishment ?? "",
-        inventoryBooks: inventoryBooks.map((inventoryBook) => ({
-          book_id: inventoryBook.book_id,
-          quantity: inventoryBook.quantity,
+        inventoryBooks: inventoryBooks.map(({ book_id, quantity }) => ({
+          book_id,
+          quantity,
         })),
       });
-
       await storageUpdateInventoryHistory(inventory);
     } else {
       await handleEditOfflineInventory();
     }
-
     navigate("inventories");
-  }
+  }, [
+    offlineInventory,
+    editInventory,
+    handleEditOfflineInventory,
+    inventory,
+    inventoryBooks,
+    isConnected,
+    navigate,
+    selectedEstablishment,
+  ]);
 
-  async function handleEditOfflineInventory() {
-    try {
-      setIsOfflineActionPending(true);
-
-      await storageUpdateOfflineInventory(
-        {
-          establishment_id: selectedEstablishment ?? "",
-          total_quantity: total,
-          books: inventoryBooks.map((inventoryBook) => ({
-            book_id: inventoryBook.book_id,
-            book: inventoryBook.book,
-            quantity: inventoryBook.quantity,
-          })),
-          errors: [],
-        },
-        offlineInventory?.temporary_id ?? "",
+  const handleDeleteBook = useCallback(
+    (bookId: string) => {
+      setInventoryBooks((prev) =>
+        prev.filter((item) => item.book.id !== bookId),
       );
 
-      toast.show({
-        message: "Inventário offline editado com sucesso",
-        variant: "success",
-        duration: 3000,
-      });
-    } catch {
-      toast.show({
-        message: "Erro ao editar inventário offline",
-        variant: "success",
-        duration: 3000,
-      });
-    } finally {
-      setIsOfflineActionPending(false);
-    }
-  }
+      if (offlineInventoryBooksErrorsIds.includes(bookId)) {
+        offlineInventoryBooksErrorsIds.splice(
+          offlineInventoryBooksErrorsIds.indexOf(bookId),
+        );
+      }
+    },
+    [offlineInventoryBooksErrorsIds],
+  );
 
-  function handleNavigate() {
+  const handleNavigate = useCallback(() => {
     if (selectedEstablishment || inventoryBooks.length > 0) {
-      return Alert.alert(
+      Alert.alert(
         "Voltar sem salvar",
-        "Tem certeza que deseja voltar sem salvar o inventário?",
+        "Tem certeza que deseja voltar sem salvar o inventário?",
         [
-          {
-            text: "Cancelar",
-            style: "cancel",
-          },
+          { text: "Cancelar", style: "cancel" },
           {
             text: "Voltar",
-            onPress: () => {
-              navigate("inventories");
-            },
             style: "destructive",
+            onPress: () => navigate("inventories"),
           },
         ],
       );
+    } else {
+      goBack();
     }
-
-    goBack();
-  }
-
-  const selectOptions = useMemo(
-    () => (isConnected ? (establishments ?? []) : offlineEstablishments),
-    [isConnected, establishments, offlineEstablishments],
-  );
-
-  function handleDeleteBook(bookId: string) {
-    setInventoryBooks((prev) =>
-      prev.filter((inventoryBook) => inventoryBook.book.id !== bookId),
-    );
-  }
+  }, [selectedEstablishment, inventoryBooks, navigate, goBack]);
 
   useEffect(() => {
     if (!inventoryId || !isConnected) return;
-
     (async () => {
       try {
         setLoading(true);
         const { data } = await api.get<IResponse>(`inventories/${inventoryId}`);
-
         setInventoryBooks(data.books);
-      } catch (error) {
-        console.error(error);
       } finally {
         setLoading(false);
       }
     })();
   }, [inventoryId, isConnected]);
 
+  // Buscar estabelecimentos offline
   useEffect(() => {
     if (isConnected) return;
-
     (async () => {
       try {
         setLoading(true);
@@ -328,15 +291,17 @@ export function InventoryActions() {
           initialEstablishment,
           inventory?.establishment_id,
         );
-
         setOfflineEstablishments(establishments);
-      } catch (err) {
-        console.error(err);
       } finally {
         setLoading(false);
       }
     })();
   }, [isConnected, initialEstablishment, inventory?.establishment_id]);
+
+  const selectOptions = useMemo(
+    () => (isConnected ? (establishments ?? []) : offlineEstablishments),
+    [isConnected, establishments, offlineEstablishments],
+  );
 
   if (loading) return <Loading />;
 
@@ -350,8 +315,8 @@ export function InventoryActions() {
         >
           <AlertIcon as={CloudAlert} className="text-teal-700" />
           <AlertText className="ml-1 text-sm text-teal-700">
-            Você não tem dados salvos no dispositivo para criar um inventário,
-            conecte-se a internet.
+            Você não tem dados salvos no dispositivo para criar um inventário.
+            Conecte-se à internet.
           </AlertText>
         </AlertUI>
         <Button
@@ -365,6 +330,8 @@ export function InventoryActions() {
     );
   }
 
+  const isPending = isCreatePending || isEditPending || isOfflineActionPending;
+
   return (
     <VStack className="flex-1 bg-white">
       <Header
@@ -375,6 +342,7 @@ export function InventoryActions() {
             : `Editar Inventário ${inventory?.identifier ?? "offline"}`
         }
       />
+
       <VStack className="mt-7 flex-1 px-6">
         <Select
           options={selectOptions}
@@ -394,7 +362,7 @@ export function InventoryActions() {
           <Text className="text-xl">Total: {total}</Text>
         </HStack>
 
-        {!isCreateAction && loading && inventoryBooks.length === 0 ? (
+        {loading && inventoryBooks.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <Spinner size="large" />
           </View>
@@ -406,30 +374,30 @@ export function InventoryActions() {
             data={inventoryBooks}
             keyExtractor={(item) => item.book.id}
             contentContainerStyle={{ paddingBottom: 75 }}
-            renderItem={({ item: inventoryBook }) => (
+            renderItem={({ item }) => (
               <>
-                <SwipeToDelete
-                  onDelete={() => handleDeleteBook(inventoryBook.book.id)}
-                >
+                <SwipeToDelete onDelete={() => handleDeleteBook(item.book.id)}>
                   <BookCard
-                    onPress={() => setEditingBookId(inventoryBook.book.id)}
-                    quantity={inventoryBook.quantity}
-                    book={inventoryBook.book}
+                    onPress={() => setEditingBookId(item.book.id)}
+                    quantity={item.quantity}
+                    book={item.book}
                     isOfflineError={offlineInventoryBooksErrorsIds.includes(
-                      inventoryBook.book.id,
+                      item.book.id,
                     )}
                   />
                 </SwipeToDelete>
+
                 <UpdateProductDialog
                   setBooks={setInventoryBooks}
-                  book={inventoryBook}
-                  isOpen={editingBookId === inventoryBook.book_id}
+                  book={item}
+                  isOpen={editingBookId === item.book_id}
                   onClose={() => setEditingBookId(null)}
                 />
               </>
             )}
           />
         )}
+
         <Fab
           onPress={
             isCreateAction && !isOfflineEditAction
@@ -438,14 +406,13 @@ export function InventoryActions() {
           }
           isDisabled={
             !selectedEstablishment ||
-            isCreatePending ||
-            isEditPending ||
-            isOfflineActionPending
+            isPending ||
+            offlineInventoryBooksErrorsIds.length > 0
           }
           placement="bottom center"
           className="w-32 rounded-md bg-teal-600 data-[active=true]:bg-teal-500"
         >
-          {isCreatePending || isEditPending || isOfflineActionPending ? (
+          {isPending ? (
             <Spinner size="small" />
           ) : (
             <>
@@ -458,29 +425,6 @@ export function InventoryActions() {
             </>
           )}
         </Fab>
-        <Menu
-          offset={5}
-          trigger={({ ...triggerProps }) => (
-            <Fab
-              {...triggerProps}
-              size="lg"
-              className="bg-teal-600 data-[active=true]:bg-teal-500"
-            >
-              <FabIcon as={MenuIcon} />
-            </Fab>
-          )}
-        >
-          <MenuItem
-            onPress={handleClearInventory}
-            key="Limpar"
-            textValue="Limpar"
-          >
-            <Icon as={BrushCleaning} size="sm" className="mr-2 text-teal-600" />
-            <MenuItemLabel size="sm" className="text-gray-800">
-              Limpar
-            </MenuItemLabel>
-          </MenuItem>
-        </Menu>
       </VStack>
     </VStack>
   );

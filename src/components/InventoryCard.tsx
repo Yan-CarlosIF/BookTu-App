@@ -1,5 +1,6 @@
 import { InventoryActionSheet } from "@components/InventoryActionSheet";
 import { useNavigation } from "@react-navigation/native";
+import { storageRemoveInventoryHistory } from "@storage/StorageInventoryHistory";
 import { useDeleteInventory } from "@useCases/Inventory/useDeleteInventory";
 import {
   Building2,
@@ -34,7 +35,6 @@ import { VStack } from "@/components/ui/vstack";
 
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Inventory } from "../shared/types/inventory";
-import { storageRemoveInventoryHistory } from "../storage/StorageInventoryHistory";
 
 const END_POSITION = 120;
 const SCREEN_WIDTH = Dimensions.get("window").width;

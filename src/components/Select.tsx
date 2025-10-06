@@ -10,6 +10,7 @@ import {
   SelectContent,
   SelectDragIndicator,
   SelectDragIndicatorWrapper,
+  SelectFlatList,
   SelectItem,
   SelectPortal,
   SelectTrigger,
@@ -47,7 +48,7 @@ export function Select<T extends string>({
   }
 
   const labelSelected = options.find(
-    (option) => option.value === selectedFilter
+    (option) => option.value === selectedFilter,
   )?.label;
 
   return (
@@ -55,27 +56,37 @@ export function Select<T extends string>({
       <SelectTrigger
         disabled={isDisabled}
         onPress={() => setIsSelectOpen((prevState) => !prevState)}
-        className={!Input ? "border-0" : "justify-between px-2 h-12"}
+        className={!Input ? "border-0" : "h-12 justify-between px-2"}
         size="md"
       >
         {Input && <Input placeholder="Selecione um Estabelecimento" />}
         {Icon ? <Icon size={18} /> : <InputIcon as={Funnel} />}
       </SelectTrigger>
+
       <SelectPortal isOpen={isSelectOpen}>
         <SelectBackdrop onPress={() => setIsSelectOpen(false)} />
         <SelectContent>
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
-          {options.map(({ label, value }) => (
-            <SelectItem
-              className={value === selectedFilter ? "bg-teal-300/15" : ""}
-              onPress={() => handleSelectFilter(value)}
-              key={value}
-              label={label}
-              value={value}
-            />
-          ))}
+
+          <SelectFlatList
+            data={options}
+            keyExtractor={(item) => (item as { label: string; value: T }).value}
+            renderItem={({ item }) => {
+              const { label, value } = item as { label: string; value: T };
+
+              return (
+                <SelectItem
+                  className={value === selectedFilter ? "bg-teal-300/15" : ""}
+                  onPress={() => handleSelectFilter(value)}
+                  key={value}
+                  label={label}
+                  value={value}
+                />
+              );
+            }}
+          />
         </SelectContent>
       </SelectPortal>
     </UISelect>

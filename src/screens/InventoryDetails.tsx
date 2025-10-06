@@ -2,8 +2,14 @@ import { BookCard } from "@components/BookCard";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { storageUpdateInventoryHistory } from "@storage/StorageInventoryHistory";
+import {
+  storageRemoveOfflineInventory,
+  storageUpdateOfflineInventory,
+} from "@storage/StorageOfflineInventories";
 import { useListInventoryBooks } from "@useCases/Inventory/useListInventoryBooks";
 import { useProcessInventory } from "@useCases/Inventory/useProcessInventory";
+import { useSyncOfflineInventories } from "@useCases/Inventory/useSyncOfflineInventories";
 import {
   AlertCircle,
   Building2,
@@ -29,12 +35,6 @@ import { useToast } from "../hooks/useToast";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Inventory } from "../shared/types/inventory";
 import { OfflineInventory } from "../shared/types/offlineInventory";
-import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
-import {
-  storageRemoveOfflineInventory,
-  storageUpdateOfflineInventory,
-} from "../storage/StorageOfflineInventories";
-import { useSyncOfflineInventories } from "../useCases/Inventory/useSyncOfflineInventories";
 
 export function InventoryDetailScreen() {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();

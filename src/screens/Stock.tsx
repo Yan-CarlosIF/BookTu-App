@@ -19,14 +19,15 @@ import { useNetInfo } from "../hooks/useNetInfo";
 
 export function Stock() {
   const { isConnected } = useNetInfo();
-  const { data: establishmentsData, isPending: isPendingEstablishments } =
-    useGetAllEstablishments();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>(
     undefined,
   );
+
+  const { data: establishments, isPending: isPendingEstablishments } =
+    useGetAllEstablishments();
 
   const {
     data,
@@ -40,22 +41,6 @@ export function Stock() {
 
   const stockItems = data?.items ?? [];
   const totalItems = data?.total ?? 0;
-
-  let establishments: { label: string; value: string }[] = [];
-
-  if (!isPendingEstablishments) {
-    establishments =
-      establishmentsData?.reduce(
-        (obj, establishment) => {
-          obj.push({
-            label: establishment.name,
-            value: establishment.id,
-          });
-          return obj;
-        },
-        [] as { label: string; value: string }[],
-      ) ?? [];
-  }
 
   return (
     <VStack className="flex-1">
@@ -85,7 +70,7 @@ export function Stock() {
               rightIcon={
                 <Select
                   isDisabled={isPendingEstablishments || !isConnected}
-                  options={establishments}
+                  options={establishments ?? []}
                   selectedFilter={selectedFilter}
                   setSelectedFilter={setSelectedFilter}
                 />

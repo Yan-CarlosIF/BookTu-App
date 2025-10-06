@@ -1,4 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
+import { storageUpdateInventoryHistory } from "@storage/StorageInventoryHistory";
 import { useProcessInventory } from "@useCases/Inventory/useProcessInventory";
 import { Box, PenLine } from "lucide-react-native";
 import { Text, View } from "react-native";
@@ -20,7 +21,6 @@ import { VStack } from "@/components/ui/vstack";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Inventory } from "../shared/types/inventory";
-import { storageUpdateInventoryHistory } from "../storage/StorageInventoryHistory";
 
 type InventoryActionSheetProps = {
   isOpen: boolean;

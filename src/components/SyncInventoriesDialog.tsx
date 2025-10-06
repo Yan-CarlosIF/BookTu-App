@@ -1,16 +1,21 @@
 import { useNavigation } from "@react-navigation/native";
 import {
+  storageGetOfflineInventories,
+  storageRemoveOfflineInventory,
+  storageUpdateOfflineInventory,
+} from "@storage/StorageOfflineInventories";
+import { useSyncOfflineInventories } from "@useCases/Inventory/useSyncOfflineInventories";
+import {
   AlertTriangle,
   CheckCircle,
   CircleQuestionMark,
 } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { SectionList, Text, View } from "react-native";
 
 import {
   AlertDialog,
   AlertDialogBackdrop,
-  AlertDialogBody,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -24,12 +29,6 @@ import { VStack } from "@/components/ui/vstack";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { SyncInventoryError } from "../screens/Home";
-import {
-  storageGetOfflineInventories,
-  storageRemoveOfflineInventory,
-  storageUpdateOfflineInventory,
-} from "../storage/StorageOfflineInventories";
-import { useSyncOfflineInventories } from "../useCases/Inventory/useSyncOfflineInventories";
 
 type SyncInventoriesDialogProps = {
   isOpen: boolean;
@@ -177,22 +176,26 @@ export function SyncInventoriesDialog({
           </Text>
         </AlertDialogHeader>
 
-        <AlertDialogBody>
+        <VStack>
           {renderIcon()}
 
           {isSyncing ? (
             <Text className="mt-4 text-center text-gray-600">
               Aguarde enquanto os inventários são sincronizados...
             </Text>
-          ) : isSuccess ? (
+          ) : isSuccess && !hasErrors ? (
             <Text className="mt-4 text-center text-gray-600">
               Todos os inventários foram sincronizados corretamente
             </Text>
           ) : (
-            <Text className="text-md mt-4 text-center text-gray-600">
-              Você possui inventários offline que podem ser sincronizados com o
-              servidor, deseja sincroniza-los?
-            </Text>
+            !isSyncing &&
+            !hasErrors &&
+            !isSuccess && (
+              <Text className="text-md mt-4 text-center text-gray-600">
+                Você possui inventários offline que podem ser sincronizados com
+                o servidor, deseja sincroniza-los?
+              </Text>
+            )
           )}
 
           {!isSyncing && hasErrors && (
@@ -201,36 +204,25 @@ export function SyncInventoriesDialog({
                 Detalhes dos erros:
               </Text>
 
-              <FlatList
-                data={syncErrors}
-                keyExtractor={({ inventoryId }) => inventoryId}
-                nestedScrollEnabled
-                renderItem={({ item }) => (
-                  <VStack className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3">
-                    <Text className="font-semibold text-red-600">
-                      Inventário {item.inventoryId}
+              <View className="rounded-md bg-red-100/50 p-2">
+                <SectionList
+                  sections={syncErrors.map((item) => ({
+                    title: `Inventário ${item.inventoryId}`,
+                    data: item.errors,
+                  }))}
+                  keyExtractor={(item, index) => item.id + index}
+                  renderItem={({ item }) => (
+                    <Text className="ml-2 mt-1 text-sm text-gray-700">
+                      • Erro no{" "}
+                      {item.type === "book" ? "livro" : "estabelecimento"} de
+                      ID: {item.id}
                     </Text>
-                    <Text className="mt-1 text-sm text-red-500">
-                      {item.message}
-                    </Text>
-
-                    {item.errors && item.errors.length > 0 && (
-                      <FlatList
-                        data={item.errors}
-                        keyExtractor={({ id }) => id}
-                        nestedScrollEnabled
-                        renderItem={({ item: { id, type } }) => (
-                          <Text className="ml-2 mt-1 text-sm text-gray-700">
-                            • Erro no{" "}
-                            {type === "book" ? "livro" : "estabelecimento"} de
-                            ID: {id}
-                          </Text>
-                        )}
-                      />
-                    )}
-                  </VStack>
-                )}
-              />
+                  )}
+                  renderSectionHeader={({ section: { title } }) => (
+                    <Text className="font-semibold text-red-600">{title}</Text>
+                  )}
+                />
+              </View>
             </View>
           )}
 
@@ -239,8 +231,8 @@ export function SyncInventoriesDialog({
               Ocorreu um erro ao sincronizar os inventários
             </Text>
           )}
-        </AlertDialogBody>
-        <AlertDialogFooter className="mt-6">
+        </VStack>
+        <AlertDialogFooter className="mt-12">
           <HStack className="w-full justify-end gap-3">
             {!isSyncing && (hasErrors || isSuccess) ? (
               <>
