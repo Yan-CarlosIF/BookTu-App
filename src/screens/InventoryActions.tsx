@@ -86,12 +86,25 @@ export function InventoryActions() {
   const isCreateAction = !inventoryId && !inventory;
   const isOfflineEditAction = !!offlineInventory?.temporary_id;
 
+  const offlineInventoryBooksErrorsIds =
+    offlineInventory?.errors?.map((error) => {
+      if (error.type === "book") {
+        return error.id;
+      }
+    }) ?? [];
+
   const { data: establishmentsData } = useGetAllEstablishments();
 
   let initialEstablishment = inventory?.establishment_id ?? undefined;
 
   if (offlineInventory) {
-    initialEstablishment = offlineInventory.establishment_id;
+    if (
+      !offlineInventory.errors.find((error) => error.type === "establishment")
+    ) {
+      initialEstablishment = undefined;
+    } else {
+      initialEstablishment = offlineInventory.establishment_id;
+    }
   }
 
   const establishments = establishmentsData?.reduce((obj, establishment) => {
@@ -232,6 +245,7 @@ export function InventoryActions() {
             book: inventoryBook.book,
             quantity: inventoryBook.quantity,
           })),
+          errors: [],
         },
         offlineInventory?.temporary_id ?? "",
       );
@@ -396,6 +410,9 @@ export function InventoryActions() {
                     onPress={() => setEditingBookId(inventoryBook.book.id)}
                     quantity={inventoryBook.quantity}
                     book={inventoryBook.book}
+                    isOfflineError={offlineInventoryBooksErrorsIds.includes(
+                      inventoryBook.book.id,
+                    )}
                   />
                 </SwipeToDelete>
                 <UpdateProductDialog

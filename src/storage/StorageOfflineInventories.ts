@@ -1,7 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Book } from "../shared/types/book";
-import { OfflineInventory } from "../shared/types/offlineInventory";
+import {
+  OfflineInventory,
+  OfflineInventoryError,
+} from "../shared/types/offlineInventory";
 import { storageGetEstablishment } from "./StorageBooksAndEstablishments";
 import { OFFLINE_INVENTORIES_STORAGE } from "./StorageConfig";
 
@@ -26,7 +29,7 @@ async function storageGetOfflineInventories() {
 }
 
 async function storageUpdateOfflineInventories(
-  data: CreateOfflineInventorySchema,
+  data: CreateOfflineInventorySchema & { errors: OfflineInventoryError[] },
   offlineInventoryId: string,
 ) {
   const inventories = await storageGetOfflineInventories();
@@ -37,17 +40,16 @@ async function storageUpdateOfflineInventories(
 
   if (inventoryIndex === -1) throw new Error("Inventory not found");
 
-  if (inventories[inventoryIndex].establishment_id === data.establishment_id) {
-    inventories[inventoryIndex].books = data.books;
-    inventories[inventoryIndex].total_quantity = data.total_quantity;
-  } else {
+  if (inventories[inventoryIndex].establishment_id !== data.establishment_id) {
     const establishment = await storageGetEstablishment(data.establishment_id);
 
     inventories[inventoryIndex].establishment = establishment;
     inventories[inventoryIndex].establishment_id = data.establishment_id;
-    inventories[inventoryIndex].books = data.books;
-    inventories[inventoryIndex].total_quantity = data.total_quantity;
   }
+
+  inventories[inventoryIndex].books = data.books;
+  inventories[inventoryIndex].total_quantity = data.total_quantity;
+  inventories[inventoryIndex].errors = data.errors;
 
   await AsyncStorage.setItem(
     OFFLINE_INVENTORIES_STORAGE,

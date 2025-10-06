@@ -23,6 +23,7 @@ type SyncInventoriesDialogProps = {
   onClose: () => void;
   isLoading: boolean;
   errors: SyncInventoryError[];
+  isError: boolean;
 };
 
 export function SyncInventoriesDialog({
@@ -30,6 +31,7 @@ export function SyncInventoriesDialog({
   isOpen,
   onClose,
   errors,
+  isError,
 }: SyncInventoriesDialogProps) {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
@@ -42,13 +44,14 @@ export function SyncInventoriesDialog({
 
   function getHeaderTitle() {
     if (isLoading) return "Sincronizando inventários...";
-    if (hasErrors) return "Alguns inventários não foram sincronizados";
+    if (hasErrors || isError)
+      return "Alguns inventários não foram sincronizados";
     return "Inventários sincronizados com sucesso!";
   }
 
   function getHeaderColor() {
     if (isLoading) return "text-teal-700";
-    if (hasErrors) return "text-red-600";
+    if (hasErrors || isError) return "text-red-600";
     return "text-emerald-600";
   }
 
@@ -62,7 +65,7 @@ export function SyncInventoriesDialog({
           className="mx-auto animate-spin"
         />
       );
-    if (hasErrors)
+    if (hasErrors || isError)
       return (
         <Icon
           as={AlertTriangle}
@@ -135,9 +138,15 @@ export function SyncInventoriesDialog({
             </View>
           )}
 
-          {!isLoading && !hasErrors && (
+          {!isLoading && !hasErrors && !isError && (
             <Text className="mt-4 text-center text-gray-600">
               Todos os inventários foram sincronizados corretamente
+            </Text>
+          )}
+
+          {isError && (
+            <Text className="mt-4 text-center text-gray-600">
+              Ocorreu um erro ao sincronizar os inventários
             </Text>
           )}
         </AlertDialogBody>

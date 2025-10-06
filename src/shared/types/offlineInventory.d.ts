@@ -1,5 +1,10 @@
 import { OfflineInventoryBook } from "./offlineInventoryBook";
 
+export type OfflineInventoryError = {
+  id: string;
+  type: "book" | "establishment";
+};
+
 export type OfflineInventory = {
   temporary_id: string;
   total_quantity: number;
@@ -7,5 +12,5 @@ export type OfflineInventory = {
   establishment: Establishment;
   status: "unprocessed";
   books: OfflineInventoryBook[];
-  errors: string[];
+  errors: OfflineInventoryError[];
 };

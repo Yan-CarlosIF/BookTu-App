@@ -212,7 +212,7 @@ export function Inventories() {
             <Animated.FlatList
               itemLayoutAnimation={LinearTransition.springify(500)}
               showsVerticalScrollIndicator={false}
-              className="mt-12"
+              className="mt-4"
               data={inventories}
               keyExtractor={({ id }) => id}
               renderItem={({ item: inventory }) => (

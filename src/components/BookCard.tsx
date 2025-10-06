@@ -15,6 +15,7 @@ type BookCardProps = {
   book: Book;
   stock?: StockItem;
   onPress?: () => void;
+  isOfflineError?: boolean;
 };
 
 export function BookCard({
@@ -23,6 +24,7 @@ export function BookCard({
   onPress,
   isBook = false,
   quantity,
+  isOfflineError = false,
 }: BookCardProps) {
   function renderCategories() {
     const hasCategories = isBook && book.categories.length > 0;
@@ -70,11 +72,11 @@ export function BookCard({
   return (
     <TapGesture>
       <Pressable
-        onPress={onPress}
+        onPress={!isOfflineError ? onPress : () => {}}
         className="mb-6 h-fit"
         style={{
           borderWidth: 1,
-          borderColor: "#D9D9D9",
+          borderColor: isOfflineError ? "red" : "#D9D9D9",
           borderRadius: 16,
           padding: 16,
           flexDirection: "row",

@@ -7,13 +7,14 @@ import {
   ClipboardList,
   LogOut,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, FlatList, Text, TouchableOpacity } from "react-native";
 
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { VStack } from "@/components/ui/vstack";
 
+import { SyncInventoriesDialog } from "../components/SyncInventoriesDialog";
 import { useAuth } from "../hooks/useAuth";
 import { useNetInfo } from "../hooks/useNetInfo";
 import { api } from "../lib/api";
@@ -31,13 +32,92 @@ import {
   InventoryHistory,
   storageGetInventoryHistory,
 } from "../storage/StorageInventoryHistory";
+import {
+  storageGetOfflineInventories,
+  storageRemoveOfflineInventory,
+  storageUpdateOfflineInventories,
+} from "../storage/StorageOfflineInventories";
+import {
+  SyncInventoryResponse,
+  useSyncOfflineInventories,
+} from "../useCases/Inventory/useSyncOfflineInventories";
+
+export type SyncInventoryError = SyncInventoryResponse & {
+  inventoryId: string;
+};
 
 export function Home() {
   const { isConnected } = useNetInfo();
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+  const prevIsConnected = useRef<boolean | null>(null);
+
+  const [isSyncInventoriesDialogOpen, setIsSyncInventoriesDialogOpen] =
+    useState(false);
+  const {
+    mutateAsync: syncInventories,
+    isPending,
+    isError,
+  } = useSyncOfflineInventories();
+  const [errors, setErrors] = useState<SyncInventoryError[]>([]);
+
   const [inventoryHistory, setInventoryHistory] = useState<InventoryHistory[]>(
     [],
   );
+
+  const handleSyncOfflineInventories = useCallback(async () => {
+    const inventories = await storageGetOfflineInventories();
+
+    const inventoriesWithoutErrors = inventories.filter(
+      (inventory) => inventory.errors.length === 0,
+    );
+
+    if (inventoriesWithoutErrors.length === 0) return;
+
+    if (!isConnected) {
+      setIsSyncInventoriesDialogOpen(false);
+      return;
+    }
+
+    setIsSyncInventoriesDialogOpen(true);
+
+    try {
+      await Promise.all(
+        inventoriesWithoutErrors.map(
+          async ({ establishment_id, total_quantity, books, temporary_id }) => {
+            const result = await syncInventories({
+              establishment_id,
+              total_quantity,
+              inventoryBooks: books.map(({ book_id, quantity }) => ({
+                book_id,
+                quantity,
+              })),
+            });
+
+            if (result.wasCreated) {
+              await storageRemoveOfflineInventory(temporary_id);
+            } else {
+              setErrors((prev) => [
+                ...prev,
+                { ...result, inventoryId: temporary_id },
+              ]);
+
+              await storageUpdateOfflineInventories(
+                {
+                  establishment_id,
+                  total_quantity,
+                  books,
+                  errors: result.errors,
+                },
+                temporary_id,
+              );
+            }
+          },
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }, [isConnected, syncInventories, setErrors]);
 
   async function saveStorageData() {
     try {
@@ -69,13 +149,17 @@ export function Home() {
     }
   }
 
-  async function getInventoryHistory() {
+  const getInventoryHistory = useCallback(async () => {
     const data = await storageGetInventoryHistory();
     setInventoryHistory(data);
-  }
+  }, []);
 
   function handleNavigateToInventory(inventory: Inventory) {
     navigate("inventoryDetails", { inventory: inventory, isOffline: false });
+  }
+
+  function handleCloseSyncInventoriesDialog() {
+    setIsSyncInventoriesDialogOpen(false);
   }
 
   const { signOut } = useAuth();
@@ -104,13 +188,29 @@ export function Home() {
     }
   }
 
-  useFocusEffect(() => {
-    getInventoryHistory();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      getInventoryHistory();
+    }, [getInventoryHistory]),
+  );
 
   useEffect(() => {
     saveStorageData();
   }, []);
+
+  useEffect(() => {
+    let isFirstRun = true; // primeira montagem
+
+    if (isFirstRun) {
+      handleSyncOfflineInventories();
+      isFirstRun = false;
+    } else if (prevIsConnected.current === false && isConnected === true) {
+      // internet voltou
+      handleSyncOfflineInventories();
+    }
+
+    prevIsConnected.current = isConnected;
+  }, [isConnected, handleSyncOfflineInventories]);
 
   return (
     <VStack className="flex-1 bg-white">
@@ -171,6 +271,13 @@ export function Home() {
           )}
         />
       </VStack>
+      <SyncInventoriesDialog
+        onClose={handleCloseSyncInventoriesDialog}
+        isOpen={isSyncInventoriesDialogOpen}
+        isLoading={isPending}
+        errors={errors}
+        isError={isError}
+      />
     </VStack>
   );
 }
