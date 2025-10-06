@@ -41,6 +41,22 @@ async function storageUpdateInventoryHistory(inventory: Inventory) {
   await AsyncStorage.setItem(INVENTORY_HISTORY_STORAGE, data);
 }
 
+async function storageRemoveInventoryHistory(id: string) {
+  const data = await storageGetInventoryHistory();
+
+  const inventoryIndex = data.findIndex((inventory) => inventory.id === id);
+
+  console.log("inventário achado: ", inventoryIndex !== -1);
+
+  if (inventoryIndex === -1) return;
+
+  data.splice(inventoryIndex, 1);
+
+  const inventoryHistory = JSON.stringify(data);
+
+  await AsyncStorage.setItem(INVENTORY_HISTORY_STORAGE, inventoryHistory);
+}
+
 async function storageClearInventoryHistory() {
   await AsyncStorage.removeItem(INVENTORY_HISTORY_STORAGE);
 }
@@ -49,4 +65,5 @@ export {
   storageGetInventoryHistory,
   storageUpdateInventoryHistory,
   storageClearInventoryHistory,
+  storageRemoveInventoryHistory,
 };

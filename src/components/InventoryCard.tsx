@@ -34,6 +34,7 @@ import { VStack } from "@/components/ui/vstack";
 
 import { AppNavigatorRoutesProps } from "../routes/AppRoutes";
 import { Inventory } from "../shared/types/inventory";
+import { storageRemoveInventoryHistory } from "../storage/StorageInventoryHistory";
 
 const END_POSITION = 120;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -111,6 +112,7 @@ export function InventoryCard({ inventory }: InventoryCardProps) {
           style: "destructive",
           onPress: async () => {
             await deleteInventoryFn(inventory.id);
+            await storageRemoveInventoryHistory(inventory.id);
             position.value = withTiming(SCREEN_WIDTH, {
               duration: 400,
               easing: Easing.out(Easing.exp),

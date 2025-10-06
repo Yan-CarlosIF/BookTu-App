@@ -224,7 +224,7 @@ export function Inventories() {
               onRefresh={refetch}
               contentContainerStyle={!hasNextPage && { paddingBottom: 75 }}
               ListEmptyComponent={() => (
-                <Text className="text-center font-poppins text-2xl text-gray-600">
+                <Text className="mt-4 text-center font-poppins text-2xl text-gray-600">
                   Nenhum inventário encontrado...
                 </Text>
               )}
