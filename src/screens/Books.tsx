@@ -83,31 +83,42 @@ export function Books() {
             <Spinner size="large" />
           </View>
         ) : (
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            className="mt-12 flex-1"
-            data={isConnected ? onlineBooks : offlineBooks}
-            keyExtractor={({ id }) => id}
-            renderItem={({ item: book }) => (
-              <BookCard
-                isBook
-                onPress={() => navigate("bookDetails", { bookId: book.id })}
-                book={book}
-              />
-            )}
-            onEndReached={() => isConnected && hasNextPage && fetchNextPage()}
-            onEndReachedThreshold={0.5}
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            ListEmptyComponent={() => (
-              <Text className="text-center font-poppins text-2xl text-gray-600">
-                Nenhum livro encontrado...
+          <>
+            {selectedFilter && (
+              <Text className="mt-10 font-poppins-medium text-base text-gray-800">
+                Filtro:{" "}
+                {
+                  BOOK_FILTERS.find((filter) => filter.value === selectedFilter)
+                    ?.label
+                }
               </Text>
             )}
-            ListFooterComponent={
-              isFetchingNextPage ? <Spinner size="large" /> : null
-            }
-          />
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              className={`${selectedFilter ? "mt-4" : "mt-12"} flex-1`}
+              data={isConnected ? onlineBooks : offlineBooks}
+              keyExtractor={({ id }) => id}
+              renderItem={({ item: book }) => (
+                <BookCard
+                  isBook
+                  onPress={() => navigate("bookDetails", { bookId: book.id })}
+                  book={book}
+                />
+              )}
+              onEndReached={() => isConnected && hasNextPage && fetchNextPage()}
+              onEndReachedThreshold={0.5}
+              refreshing={isConnected && isRefetching}
+              onRefresh={isConnected ? refetch : undefined}
+              ListEmptyComponent={() => (
+                <Text className="text-center font-poppins text-2xl text-gray-600">
+                  Nenhum livro encontrado...
+                </Text>
+              )}
+              ListFooterComponent={
+                isFetchingNextPage ? <Spinner size="large" /> : null
+              }
+            />
+          </>
         )}
       </VStack>
     </VStack>

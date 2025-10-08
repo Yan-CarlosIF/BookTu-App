@@ -129,6 +129,11 @@ export function Inventories() {
 
   const isLoading = isConnected ? isPending : isOfflineInventoriesPending;
 
+  const filteredOfflineInventories =
+    offlineInventories.filter((inventory) =>
+      inventory.establishment_id.includes(selectedFilter ?? ""),
+    ) ?? [];
+
   return (
     <VStack className="flex-1">
       <Header onPress={() => navigate("home")} title="Inventários" />
@@ -155,7 +160,18 @@ export function Inventories() {
           </View>
         ) : isConnected ? (
           <>
-            {offlineInventories.length > 0 && (
+            {selectedFilter && (
+              <Text className="mt-6 font-poppins-medium text-base text-gray-800">
+                Estabelecimento:{" "}
+                {
+                  establishments?.find(
+                    (establishment) => establishment.value === selectedFilter,
+                  )?.label
+                }
+              </Text>
+            )}
+
+            {filteredOfflineInventories.length > 0 && (
               <Accordion
                 size="md"
                 type="single"
@@ -201,7 +217,7 @@ export function Inventories() {
                         className="mt-4"
                         showsVerticalScrollIndicator={false}
                         itemLayoutAnimation={LinearTransition.springify(500)}
-                        data={offlineInventories}
+                        data={filteredOfflineInventories}
                         keyExtractor={({ temporary_id }) => temporary_id}
                         contentContainerStyle={{ paddingBottom: 75 }}
                         renderItem={({ item: offlineInventory }) => (

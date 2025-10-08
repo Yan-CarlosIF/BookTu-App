@@ -9,6 +9,7 @@ import { useState } from "react";
 import { FlatList, Text } from "react-native";
 
 import { Alert, AlertIcon, AlertText } from "@/components/ui/alert";
+import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -77,14 +78,28 @@ export function Stock() {
               }
             />
 
-            <Text className="mt-8 flex items-center font-poppins-medium text-lg text-gray-800">
-              {isPending && isConnected ? (
-                <Skeleton speed={2} className="h-4 w-6 rounded-sm" />
-              ) : (
-                <Text>{totalItems}</Text>
-              )}{" "}
-              Itens
-            </Text>
+            <HStack className="mt-8 flex items-center justify-between">
+              <Text className="font-poppins-medium text-lg text-gray-800">
+                {isPending && isConnected ? (
+                  <Skeleton speed={2} className="h-4 w-6 rounded-sm" />
+                ) : (
+                  <Text>{totalItems}</Text>
+                )}{" "}
+                Itens
+              </Text>
+              {selectedFilter && (
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  className="max-w-[250px] font-poppins-medium text-lg text-gray-800"
+                >
+                  {
+                    establishments?.find((e) => e.value === selectedFilter)
+                      ?.label
+                  }
+                </Text>
+              )}
+            </HStack>
 
             {isPending && isConnected ? (
               <VStack className="flex-1 items-center justify-center">
