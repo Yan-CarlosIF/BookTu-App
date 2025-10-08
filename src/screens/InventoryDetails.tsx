@@ -20,11 +20,13 @@ import {
   Fingerprint,
   MapPin,
   Package,
+  PenBox,
   Tag,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { Alert, FlatList, Text, View } from "react-native";
 
+import { ButtonIcon } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
@@ -72,6 +74,21 @@ export function InventoryDetailScreen() {
   const books = data?.items ?? offlineInventory?.books ?? [];
   const totalItems = data?.total ?? offlineInventory?.books?.length ?? 0;
 
+  const handleConfirmAction = () => {
+    Alert.alert(
+      "Confirmação",
+      `Deseja ${isOffline ? "sincronizar" : "processar"} o inventário?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: isOffline ? "Sincronizar" : "Processar",
+          style: "destructive",
+          onPress: isOffline ? handleSyncInventory : handleProcessInventory,
+        },
+      ],
+    );
+  };
+
   const handleProcessInventory = async () => {
     if (isOffline) return;
 
@@ -116,6 +133,17 @@ export function InventoryDetailScreen() {
 
       await storageRemoveOfflineInventory(offlineInventory.temporary_id);
       navigate("inventories");
+    }
+  };
+
+  const handleNavigateToEditScreen = () => {
+    if (isOffline) {
+      navigate("inventoryActions", { offlineInventory });
+    } else {
+      navigate("inventoryActions", {
+        inventory: actualInventory,
+        inventoryId: actualInventory.id,
+      });
     }
   };
 
@@ -321,16 +349,24 @@ export function InventoryDetailScreen() {
 
         {(processedStatus === "unprocessed" || isProcessing || isSyncing) &&
           isConnected && (
-            <Button
-              disabled={isProcessing || isSyncing}
-              isLoading={isProcessing || isSyncing}
-              onPress={isOffline ? handleSyncInventory : handleProcessInventory}
-              className="mb-6 h-14 items-center justify-center rounded-xl bg-[#2BADA1] data-[active=true]:bg-teal-400"
-            >
-              <Text className="text-lg font-bold text-white">
-                {isOffline ? "Sincronizar" : "Processar"} Inventário
-              </Text>
-            </Button>
+            <HStack className="gap-4">
+              <Button
+                disabled={isProcessing || isSyncing}
+                isLoading={isProcessing || isSyncing}
+                onPress={handleConfirmAction}
+                className="mb-6 h-14 w-[80%] items-center justify-center rounded-xl bg-[#2BADA1] data-[active=true]:bg-teal-400"
+              >
+                <Text className="text-lg font-bold text-white">
+                  {isOffline ? "Sincronizar" : "Processar"} Inventário
+                </Text>
+              </Button>
+              <Button
+                onPress={handleNavigateToEditScreen}
+                className="h-14 w-14 rounded-xl bg-yellow-500 data-[active=true]:bg-yellow-400"
+              >
+                <ButtonIcon as={PenBox} />
+              </Button>
+            </HStack>
           )}
       </VStack>
     </VStack>

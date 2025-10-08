@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { storageUpdateInventoryHistory } from "@storage/StorageInventoryHistory";
 import { useProcessInventory } from "@useCases/Inventory/useProcessInventory";
 import { Box, PenLine } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 
 import {
   Actionsheet,
@@ -49,6 +49,17 @@ export function InventoryActionSheet({
     onClose();
   }
 
+  function handleConfirmAction() {
+    Alert.alert("Confirmação", "Deseja processar o inventário?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Processar",
+        style: "destructive",
+        onPress: handleProcessInventory,
+      },
+    ]);
+  }
+
   function handleNavigateToEditInventory() {
     navigate("inventoryActions", { inventory, inventoryId: inventory.id });
     onClose();
@@ -68,7 +79,7 @@ export function InventoryActionSheet({
         <ActionsheetItem
           isDisabled={isProcessing}
           className="mt-6 h-24 rounded-md border border-teal-300 bg-teal-300/15 data-[active=true]:bg-teal-300/50"
-          onPress={handleProcessInventory}
+          onPress={handleConfirmAction}
         >
           <HStack className="gap-4">
             <View className="h-12 w-12 items-center justify-center rounded-md bg-teal-400/50">
