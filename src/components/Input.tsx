@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/input";
 
 type InputProps = {
+  iconSize?: number;
   rightIcon?: React.ReactNode;
   leftIcon?: LucideIcon;
   helper?: string;
@@ -27,6 +28,7 @@ type InputProps = {
   IInputFieldProps;
 
 export function Input({
+  iconSize,
   error,
   value,
   onChangeText,
@@ -47,7 +49,7 @@ export function Input({
       <InputBase {...props}>
         {leftIcon && (
           <InputSlot>
-            <InputIcon as={leftIcon} size={20} />
+            <InputIcon as={leftIcon} size={iconSize ? iconSize : 20} />
           </InputSlot>
         )}
         <InputField

@@ -10,6 +10,7 @@ import { Inventories } from "../screens/Inventories";
 import { InventoryActions } from "../screens/InventoryActions";
 import { InventoryDetailScreen } from "../screens/InventoryDetails";
 import { Stock } from "../screens/Stock";
+import { SyncMenu } from "../screens/SyncMenu";
 import { Inventory } from "../shared/types/inventory";
 import { OfflineInventory } from "../shared/types/offlineInventory";
 
@@ -30,6 +31,7 @@ type AppRoutesType = {
     inventory?: Inventory;
     offlineInventory?: OfflineInventory;
   };
+  syncMenu: undefined;
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutesType>;
@@ -46,6 +48,7 @@ export function AppRoutes() {
       <Screen name="inventories" component={Inventories} />
       <Screen name="inventoryDetails" component={InventoryDetailScreen} />
       <Screen name="inventoryActions" component={InventoryActions} />
+      <Screen name="syncMenu" component={SyncMenu} />
     </Navigator>
   );
 }

@@ -295,7 +295,7 @@ export function InventoryDetailScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
             data={offlineInventory.books}
-            keyExtractor={(item) => item.book_id}
+            keyExtractor={({ book_id }) => book_id}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => (
               <Text className="mt-4 text-center font-poppins text-2xl text-gray-600">
@@ -304,6 +304,7 @@ export function InventoryDetailScreen() {
             )}
             renderItem={({ item: inventoryBook }) => (
               <BookCard
+                isTappable={false}
                 quantity={inventoryBook.quantity}
                 book={inventoryBook.book}
               />
@@ -325,7 +326,7 @@ export function InventoryDetailScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
             data={books}
-            keyExtractor={(item) => item.book_id}
+            keyExtractor={({ book_id }) => book_id}
             refreshing={isRefetching}
             onRefresh={refetch}
             onEndReached={() => hasNextPage && fetchNextPage()}
@@ -340,6 +341,7 @@ export function InventoryDetailScreen() {
             }
             renderItem={({ item: inventoryBook }) => (
               <BookCard
+                isTappable={false}
                 quantity={inventoryBook.quantity}
                 book={inventoryBook.book}
               />
@@ -349,7 +351,7 @@ export function InventoryDetailScreen() {
 
         {(processedStatus === "unprocessed" || isProcessing || isSyncing) &&
           isConnected && (
-            <HStack className="gap-4">
+            <HStack className="gap-4 bg-transparent">
               <Button
                 disabled={isProcessing || isSyncing}
                 isLoading={isProcessing || isSyncing}

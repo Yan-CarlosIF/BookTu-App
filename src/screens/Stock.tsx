@@ -67,7 +67,7 @@ export function Stock() {
               onChangeText={setSearch}
               leftIcon={Search}
               className="h-12 rounded-2xl border-gray-500 px-3 data-[focus=true]:border-teal-600"
-              placeholder="Buscar pelo título do livro"
+              placeholder="Buscar pelo título ou identificador do livro"
               rightIcon={
                 <Select
                   isDisabled={isPendingEstablishments || !isConnected}
@@ -112,7 +112,7 @@ export function Stock() {
                 data={stockItems}
                 keyExtractor={({ id }) => id}
                 renderItem={({ item }) => (
-                  <BookCard book={item.book} stock={item} />
+                  <BookCard isTappable={false} book={item.book} stock={item} />
                 )}
                 onEndReached={() => hasNextPage && fetchNextPage()}
                 onEndReachedThreshold={0.5}

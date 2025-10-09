@@ -16,6 +16,8 @@ import {
   Book as BookIcon,
   Box,
   ClipboardList,
+  FolderSync,
+  GlobeIcon,
   LogOut,
   WifiSync,
 } from "lucide-react-native";
@@ -25,6 +27,7 @@ import { Alert, FlatList, Text, TouchableOpacity } from "react-native";
 import { Fab, FabIcon } from "@/components/ui/fab";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { VStack } from "@/components/ui/vstack";
 
 import { SyncInventoriesDialog } from "../components/SyncInventoriesDialog";
@@ -53,7 +56,7 @@ export function Home() {
     [],
   );
 
-  async function saveStorageData() {
+  const saveStorageData = useCallback(async () => {
     try {
       const refetchInterval = await storageGetRefetchTimestamp();
 
@@ -81,7 +84,7 @@ export function Home() {
         error,
       );
     }
-  }
+  }, []);
 
   const getInventoryHistory = useCallback(async () => {
     const data = await storageGetInventoryHistory();
@@ -124,9 +127,11 @@ export function Home() {
     }, [getInventoryHistory]),
   );
 
-  useEffect(() => {
-    saveStorageData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      saveStorageData();
+    }, [saveStorageData]),
+  );
 
   useEffect(() => {
     (async () => {
@@ -202,14 +207,45 @@ export function Home() {
         setIsOpen={setIsSyncInventoriesDialogOpen}
       />
 
-      {hasOfflineInventories && (
-        <Fab
-          size={32}
-          className="bg-teal-600 data-[active=true]:bg-teal-500"
-          onPress={() => setIsSyncInventoriesDialogOpen(true)}
+      {isConnected && (
+        <Menu
+          placement="bottom right"
+          offset={5}
+          trigger={({ ...triggerProps }) => {
+            return (
+              <Fab
+                size={32}
+                className="bg-teal-600 data-[active=true]:bg-teal-500"
+                {...triggerProps}
+              >
+                <FabIcon as={WifiSync} size={20} />
+              </Fab>
+            );
+          }}
         >
-          <FabIcon as={WifiSync} size={20} />
-        </Fab>
+          <MenuItem
+            onPress={() => navigate("syncMenu")}
+            key="Menu"
+            textValue="Menu"
+          >
+            <Icon as={GlobeIcon} size="sm" className="mr-2 text-teal-600" />
+            <MenuItemLabel size="sm" className="text-gray-800">
+              Menu de sincronização
+            </MenuItemLabel>
+          </MenuItem>
+          {hasOfflineInventories && (
+            <MenuItem
+              onPress={() => setIsSyncInventoriesDialogOpen(true)}
+              key="Sincronizar Inventários"
+              textValue="Sincronizar Inventários"
+            >
+              <Icon as={FolderSync} size="sm" className="mr-2 text-teal-600" />
+              <MenuItemLabel size="sm" className="text-gray-800">
+                Sincronizar Inventários
+              </MenuItemLabel>
+            </MenuItem>
+          )}
+        </Menu>
       )}
     </VStack>
   );

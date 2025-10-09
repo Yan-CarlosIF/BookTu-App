@@ -59,7 +59,7 @@ const alertDialogStyle = tva({
 });
 
 const alertDialogContentStyle = tva({
-  base: 'bg-background-0 rounded-lg overflow-hidden border border-outline-100 p-6',
+  base: 'bg-background-0 rounded-lg overflow-visible border border-outline-100 p-6',
   parentVariants: {
     size: {
       xs: 'w-[60%] max-w-[360px]',

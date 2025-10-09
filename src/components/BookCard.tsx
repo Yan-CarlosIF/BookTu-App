@@ -10,6 +10,7 @@ import { StockItem } from "../shared/types/stockItem";
 import { formatPrice } from "../utils/formatPrice";
 
 type BookCardProps = {
+  isTappable?: boolean;
   isBook?: boolean;
   quantity?: number;
   book: Book;
@@ -19,6 +20,7 @@ type BookCardProps = {
 };
 
 export function BookCard({
+  isTappable = true,
   stock,
   book,
   onPress,
@@ -70,7 +72,7 @@ export function BookCard({
   }
 
   return (
-    <TapGesture>
+    <TapGesture disabled={!isTappable}>
       <Pressable
         onPress={!isOfflineError ? onPress : () => {}}
         className="mb-6 h-fit"
@@ -82,6 +84,14 @@ export function BookCard({
           flexDirection: "row",
           backgroundColor: "white",
           overflow: "hidden",
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 12,
+          elevation: 2,
         }}
       >
         <View className="mr-4 h-28 w-20 items-center justify-center overflow-hidden rounded-xl bg-teal-50">

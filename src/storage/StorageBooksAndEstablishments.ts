@@ -26,6 +26,20 @@ async function storageSetRefetchTimestamp(timestamp: number) {
   await AsyncStorage.setItem(REFETCH_TIMESTAMP, data);
 }
 
+async function storageSetBook(bookId: string, book: Book) {
+  const data = await storageGetBooks();
+
+  const bookIndex = data.findIndex((book) => book.id === bookId);
+
+  if (bookIndex === -1) {
+    throw new Error("Livro não encontrado no storage");
+  }
+
+  data[bookIndex] = book;
+
+  await storageSetBooks(data);
+}
+
 async function storageSetBooks(books: Book[]) {
   const data = JSON.stringify(books);
 
@@ -93,6 +107,7 @@ async function storageGetEstablishment(id: string) {
 
 export {
   storageSetBooks,
+  storageSetBook,
   storageGetBooks,
   storageSetEstablishments,
   storageGetFilteredEstablishments,

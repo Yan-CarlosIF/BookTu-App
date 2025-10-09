@@ -5,15 +5,22 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export function TapGesture({ children }: { children: React.ReactNode }) {
+type TapGestureProps = {
+  children: React.ReactNode;
+  disabled?: boolean | null;
+};
+
+export function TapGesture({ children, disabled = false }: TapGestureProps) {
   const scale = useSharedValue(1);
 
-  const tapGesture = Gesture.Tap().onStart(() => {
-    "worklet";
-    scale.value = withTiming(0.95, { duration: 100 }, () => {
-      scale.value = withTiming(1, { duration: 100 });
+  const tapGesture = Gesture.Tap()
+    .enabled(!disabled)
+    .onStart(() => {
+      "worklet";
+      scale.value = withTiming(0.95, { duration: 100 }, () => {
+        scale.value = withTiming(1, { duration: 100 });
+      });
     });
-  });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

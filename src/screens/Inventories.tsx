@@ -143,7 +143,7 @@ export function Inventories() {
           onChangeText={setSearch}
           leftIcon={Search}
           className="h-12 rounded-2xl border-gray-500 px-3 data-[focus=true]:border-teal-600"
-          placeholder="Buscar pelo título, autor ou identificador"
+          placeholder="Buscar pelo identificador do inventário"
           rightIcon={
             <Select
               isDisabled={isPendingEstablishments || !isConnected}
